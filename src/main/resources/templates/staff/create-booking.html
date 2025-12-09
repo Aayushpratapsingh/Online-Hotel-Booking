@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Create Booking - Staff</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .room-option {
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .room-option input {
+            margin-right: 10px;
+        }
+
+        .booking-summary {
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #4facfe;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background-color: #ccc;
+            color: #333;
+            margin-right: 10px;
+        }
+
+        .guest-results {
+            border: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+
+        .guest-result {
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .guest-result:hover {
+            background-color: #eee;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Create Booking</h1>
+        <form th:action="@{/staff/create-booking}" method="post">
+            <!-- Guest Search -->
+            <label for="guestSearch">Guest</label>
+            <input type="text" id="guestSearch" placeholder="Search guest..." oninput="searchGuests()">
+            <div id="guestResults" class="guest-results"></div>
+            <input type="hidden" id="guestId" name="guestId">
+
+            <!-- Room Selection -->
+            <label>Room</label>
+            <div class="room-option">
+                <input type="radio" name="roomId" value="101" onchange="calculateSummary()"> 101 - Deluxe Suite ($199/night)
+            </div>
+            <div class="room-option">
+                <input type="radio" name="roomId" value="102" onchange="calculateSummary()"> 102 - Standard ($99/night)
+            </div>
+            <div class="room-option">
+                <input type="radio" name="roomId" value="103" onchange="calculateSummary()"> 103 - Executive ($149/night)
+            </div>
+
+            <!-- Dates -->
+            <label for="checkInDate">Check-in</label>
+            <input type="date" id="checkInDate" name="checkInDate" onchange="calculateSummary()" required>
+
+            <label for="checkOutDate">Check-out</label>
+            <input type="date" id="checkOutDate" name="checkOutDate" onchange="calculateSummary()" required>
+
+            <!-- Guests -->
+            <label for="adults">Adults</label>
+            <select id="adults" name="adults" onchange="calculateSummary()">
+                <option value="1">1</option>
+                <option value="2" selected>2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+
+            <label for="children">Children</label>
+            <select id="children" name="children" onchange="calculateSummary()">
+                <option value="0" selected>0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+            </select>
+
+            <!-- Special Requests -->
+            <label for="specialRequests">Special Requests</label>
+            <textarea id="specialRequests" name="specialRequests" rows="3"></textarea>
+
+            <!-- Booking Summary -->
+            <div class="booking-summary">
+                <div class="summary-item"><span>Room Rate:</span> <span id="roomRate">$0</span></div>
+                <div class="summary-item"><span>Nights:</span> <span id="nights">0</span></div>
+                <div class="summary-item"><span>Subtotal:</span> <span id="subtotal">$0</span></div>
+                <div class="summary-item"><span>Tax (10%):</span> <span id="tax">$0</span></div>
+                <div class="summary-item"><strong>Total:</strong> <strong id="total">$0</strong></div>
+            </div>
+
+            <!-- Buttons -->
+            <button type="reset" class="btn btn-secondary">Clear</button>
+            <button type="submit" class="btn btn-primary">Create Booking</button>
+        </form>
+    </div>
+
+    <script>
+        const guests = [
+            { id: 1, name: 'John Smith', email: 'john@example.com', phone: '+1234567890' },
+            { id: 2, name: 'Sarah Johnson', email: 'sarah@example.com', phone: '+1234567891' },
+            { id: 3, name: 'Michael Brown', email: 'michael@example.com', phone: '+1234567892' }
+        ];
+
+        function searchGuests() {
+            const term = document.getElementById('guestSearch').value.toLowerCase();
+            const resultsDiv = document.getElementById('guestResults');
+            resultsDiv.innerHTML = '';
+
+            if (!term) return;
+
+            const filtered = guests.filter(g => g.name.toLowerCase().includes(term) ||
+                                                g.email.toLowerCase().includes(term) ||
+                                                g.phone.includes(term));
+            filtered.forEach(g => {
+                const div = document.createElement('div');
+                div.className = 'guest-result';
+                div.textContent = `${g.name} (${g.email})`;
+                div.onclick = () => selectGuest(g.id, g.name);
+                resultsDiv.appendChild(div);
+            });
+        }
+
+        function selectGuest(id, name) {
+            document.getElementById('guestId').value = id;
+            document.getElementById('guestSearch').value = name;
+            document.getElementById('guestResults').innerHTML = '';
+        }
+
+        function calculateSummary() {
+            const checkIn = new Date(document.getElementById('checkInDate').value);
+            const checkOut = new Date(document.getElementById('checkOutDate').value);
+            let nights = Math.ceil((checkOut - checkIn) / (1000*60*60*24));
+            if (isNaN(nights) || nights <= 0) nights = 0;
+
+            const selectedRoom = document.querySelector('input[name="roomId"]:checked');
+            let roomRate = 0;
+            if (selectedRoom) {
+                const text = selectedRoom.parentNode.textContent;
+                const match = text.match(/\$(\d+)/);
+                if (match) roomRate = parseInt(match[1]);
+            }
+
+            const subtotal = roomRate * nights;
+            const tax = subtotal * 0.1;
+            const total = subtotal + tax;
+
+            document.getElementById('roomRate').textContent = '$' + roomRate;
+            document.getElementById('nights').textContent = nights;
+            document.getElementById('subtotal').textContent = '$' + subtotal;
+            document.getElementById('tax').textContent = '$' + tax.toFixed(2);
+            document.getElementById('total').textContent = '$' + total.toFixed(2);
+        }
+
+        // Set min date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('checkInDate').min = today;
+        document.getElementById('checkOutDate').min = today;
+    </script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Booking Confirmation - Grand Hotel</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .confirmation-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .confirmation-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
+        }
+        
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            color: white;
+            font-size: 40px;
+            animation: bounce 1s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 32px;
+        }
+        
+        .confirmation-text {
+            color: #5d6d7e;
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .booking-details {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 30px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .booking-id {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+        
+        .booking-info {
+            color: #5d6d7e;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 40px;
+        }
+        
+        .action-btn {
+            padding: 15px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .primary-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .primary-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .secondary-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .secondary-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-3px);
+        }
+        
+        .support-info {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .support-info a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 600px) {
+            .confirmation-card {
+                padding: 30px 20px;
+            }
+            
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="confirmation-card">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        
+        <h1>Booking Confirmed!</h1>
+        
+        <p class="confirmation-text">
+            Thank you for choosing Grand Hotel. Your booking has been successfully confirmed.
+            A confirmation email has been sent to your registered email address.
+        </p>
+        
+        <div class="booking-details">
+            <div class="booking-id">
+                Booking #<span th:text="${bookingId}">BK123456</span>
+            </div>
+            <div class="booking-info">
+                <i class="fas fa-calendar-check"></i>
+                Booked on: <span th:text="${#dates.format(#dates.createNow(), 'dd MMM yyyy, HH:mm')}">01 Jan 2024, 14:30</span>
+            </div>
+            <div class="booking-info" th:if="${booking != null}">
+                <i class="fas fa-bed"></i>
+                Room: <span th:text="${booking.room.roomNumber}">101</span> - 
+                <span th:text="${booking.room.roomType}">Deluxe</span>
+            </div>
+        </div>
+        
+        <div class="actions-grid">
+            <a href="/bookings/my" class="action-btn primary-btn">
+                <i class="fas fa-list"></i>
+                View My Bookings
+            </a>
+            <a href="/rooms" class="action-btn secondary-btn">
+                <i class="fas fa-plus-circle"></i>
+                Book Another Room
+            </a>
+            <a href="/user" class="action-btn secondary-btn">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+        </div>
+        
+        <div class="support-info">
+            <p>
+                <i class="fas fa-info-circle"></i>
+                Need assistance? Contact our support team at 
+                <a href="mailto:support@grandhotel.com">support@grandhotel.com</a>
+                or call <a href="tel:+1234567890">+1 (234) 567-890</a>
+            </p>
+            <p style="margin-top: 10px; font-size: 12px;">
+                Your booking details and receipt have been saved to your account.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

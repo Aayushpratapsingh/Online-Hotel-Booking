@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <title>Staff Dashboard - Hotel Management</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            background: #2c3e50;
+            color: #fff;
+            padding-top: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 12px 20px;
+            color: #ecf0f1;
+            text-decoration: none;
+        }
+
+        .sidebar a.active,
+        .sidebar a:hover {
+            background: #1abc9c;
+            color: #fff;
+        }
+
+        /* Main content */
+        .main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .main h1 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .btn-primary {
+            background: #1abc9c;
+            color: #fff;
+            padding: 8px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .btn-primary:hover {
+            background: #16a085;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            flex: 1;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #34495e;
+            color: white;
+        }
+
+        tr:hover {
+            background: #ecf0f1;
+        }
+
+        .btn-action {
+            border: none;
+            background: none;
+            cursor: pointer;
+            padding: 5px;
+            margin: 0 3px;
+        }
+
+        .btn-checkin { color: #27ae60; }
+        .btn-checkout { color: #2980b9; }
+        .btn-cancel { color: #c0392b; }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>STAFF</h2>
+        <a href="/staff/dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="/staff/rooms"><i class="fas fa-bed"></i> Room Status</a>
+        <a href="/staff/bookings"><i class="fas fa-calendar-alt"></i> Bookings</a>
+        <a href="/staff/checkin"><i class="fas fa-sign-in-alt"></i> Check-in</a>
+        <a href="/staff/checkout"><i class="fas fa-sign-out-alt"></i> Check-out</a>
+        <a href="/staff/create-booking"><i class="fas fa-plus-circle"></i> New Booking</a>
+    </div>
+
+    <!-- Main Section -->
+    <div class="main">
+        <h1>Staff Dashboard</h1>
+
+        <!-- Quick Actions -->
+        <a href="/staff/create-booking" class="btn-primary"><i class="fas fa-plus-circle"></i> Create Booking</a>
+        <a href="/staff/checkin" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Check-in Guest</a>
+        <a href="/staff/checkout" class="btn-primary"><i class="fas fa-sign-out-alt"></i> Check-out Guest</a>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" th:text="${totalBookings ?: '0'}">0</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${availableRooms ?: '0'}">0</div>
+                <div class="stat-label">Available Rooms</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${todayCheckins ?: '0'}">0</div>
+                <div class="stat-label">Today's Check-ins</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" th:text="${todayRevenue ?: '$0'}">$0</div>
+                <div class="stat-label">Today's Revenue</div>
+            </div>
+        </div>
+
+        <!-- Recent Bookings Table -->
+        <h2>Recent Bookings</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Guest Name</th>
+                    <th>Room</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="booking : ${recentBookings}">
+                    <td th:text="${booking.id}">1</td>
+                    <td th:text="${booking.guestName}">John Doe</td>
+                    <td th:text="${booking.roomNumber}">101</td>
+                    <td th:text="${booking.checkinDate}">2025-12-09</td>
+                    <td th:text="${booking.checkoutDate}">2025-12-10</td>
+                    <td th:text="${booking.status}">Confirmed</td>
+                    <td>
+                        <button class="btn-action btn-checkin" th:if="${booking.status == 'Pending'}">
+                            <i class="fas fa-sign-in-alt"></i>
+                        </button>
+                        <button class="btn-action btn-checkout" th:if="${booking.status == 'Checked-in'}">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                        <button class="btn-action btn-cancel">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

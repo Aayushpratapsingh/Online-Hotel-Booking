@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Book a Room</title>
+    <style>
+        .booking-form {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .submit-btn {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="booking-form">
+        <h1>Book Your Room</h1>
+        <form th:action="@{/bookings/create}" method="post">
+            <input type="hidden" name="roomId" th:value="${roomId}">
+            
+            <div class="form-group">
+                <label>Check-in Date</label>
+                <input type="date" name="checkIn" required min="2024-01-01">
+            </div>
+            
+            <div class="form-group">
+                <label>Check-out Date</label>
+                <input type="date" name="checkOut" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Number of Guests</label>
+                <select name="guests" required>
+                    <option value="1">1 Guest</option>
+                    <option value="2" selected>2 Guests</option>
+                    <option value="3">3 Guests</option>
+                    <option value="4">4 Guests</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Special Requests (Optional)</label>
+                <textarea name="specialRequests" rows="4"></textarea>
+            </div>
+            
+            <button type="submit" class="submit-btn">Confirm Booking</button>
+        </form>
+    </div>
+    
+    <script>
+        // Set minimum dates
+        const today = new Date().toISOString().split('T')[0];
+        document.querySelector('input[name="checkIn"]').min = today;
+        
+        // Update checkout min date when checkin changes
+        document.querySelector('input[name="checkIn"]').addEventListener('change', function() {
+            const checkinDate = this.value;
+            document.querySelector('input[name="checkOut"]').min = checkinDate;
+        });
+    </script>
+</body>
+</html>

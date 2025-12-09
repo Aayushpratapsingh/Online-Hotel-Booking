@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Access Denied</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="auth-container">
+    <div class="auth-box" style="text-align: center;">
+        <h2 style="color: #e74c3c;">⛔ Access Denied</h2>
+        <p>You don't have permission to access this page.</p>
+        <p>Please contact your administrator if you believe this is an error.</p>
+        <div style="margin-top: 30px;">
+            <a href="/home" class="btn btn-primary">Go to Home</a>
+            <a href="/logout" class="btn btn-secondary">Logout</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Bookings</title>
+    <style>
+        .bookings-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .booking-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: white;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .cancel-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="bookings-container">
+        <h1>My Bookings</h1>
+        <a href="/rooms" style="display: inline-block; margin-bottom: 20px; padding: 10px 20px; background: #667eea; color: white; text-decoration: none; border-radius: 5px;">
+            ← Back to Rooms
+        </a>
+        
+        <div th:each="booking : ${bookings}">
+            <div class="booking-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h3>Booking #<span th:text="${booking.bookingReference}"></span></h3>
+                        <p><strong>Room:</strong> <span th:text="${booking.room.roomNumber}"></span> - 
+                           <span th:text="${booking.room.roomType}"></span></p>
+                    </div>
+                    <span class="status" th:classappend="'status-' + ${booking.status.toLowerCase()}"
+                          th:text="${booking.status}"></span>
+                </div>
+                
+                <p><strong>Dates:</strong> <span th:text="${booking.checkInDate}"></span> to 
+                   <span th:text="${booking.checkOutDate}"></span> 
+                   (<span th:text="${booking.totalNights}"></span> nights)</p>
+                <p><strong>Total Price:</strong> $<span th:text="${booking.totalPrice}"></span></p>
+                <p><strong>Guests:</strong> <span th:text="${booking.numberOfGuests}"></span></p>
+                
+                <div th:if="${booking.specialRequests != null and !booking.specialRequests.isEmpty()}">
+                    <p><strong>Special Requests:</strong> <span th:text="${booking.specialRequests}"></span></p>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <a th:href="@{/rooms}" class="action-btn">Book Again</a>
+                    <button th:if="${booking.status == 'CONFIRMED'}" 
+                            th:onclick="'cancelBooking(' + ${booking.id} + ')'" 
+                            class="cancel-btn">
+                        Cancel Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div th:if="${bookings == null or bookings.empty}">
+            <p style="text-align: center; padding: 40px; color: #666;">
+                You haven't made any bookings yet.
+                <br>
+                <a href="/rooms">Browse available rooms →</a>
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        function cancelBooking(bookingId) {
+            if (confirm('Are you sure you want to cancel this booking?')) {
+                window.location.href = '/bookings/cancel/' + bookingId;
+            }
+        }
+    </script>
+</body>
+</html>
