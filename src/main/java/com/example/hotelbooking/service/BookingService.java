@@ -21,14 +21,14 @@ public class BookingService {
     
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
-    private final UserRepository userRepository;
+//    private final UserRepository userRepository;
     
     public BookingService(BookingRepository bookingRepository, 
                          RoomRepository roomRepository,
                          UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
-        this.userRepository = userRepository;
+//        this.userRepository = userRepository;
     }
     
     /**

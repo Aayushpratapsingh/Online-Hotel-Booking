@@ -25,26 +25,27 @@ dependencies {
 
     runtimeOnly 'org.postgresql:postgresql'
 
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
+    // REMOVED: Lombok dependencies (both compileOnly and annotationProcessor)
+    // compileOnly 'org.projectlombok:lombok'
+    // annotationProcessor 'org.projectlombok:lombok'
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    // REMOVED: DevTools
+    // developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-}
-dependencies {
-    // ... existing dependencies ...
-    compileJava {
-    options.compilerArgs += ['-parameters']
-}
     
     // Thymeleaf Spring Security integration
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     
     // ... other dependencies ...
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// This should be outside the dependencies block
+compileJava {
+    options.compilerArgs += ['-parameters']
 }

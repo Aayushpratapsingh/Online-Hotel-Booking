@@ -27,10 +27,10 @@ public class UserServiceImpl implements UserService {
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        Role roleUser = roleRepo.findByName("ROLE_USER");
-        if (roleUser == null) {
-            roleUser = roleRepo.save(new Role("ROLE_USER"));
-        }
+        // Using orElse to handle Optional elegantly
+        Role roleUser = roleRepo.findByName("ROLE_USER")
+                .orElseGet(() -> roleRepo.save(new Role("ROLE_USER")));
+        
         user.setRoles(Set.of(roleUser));
         return userRepo.save(user);
     }
