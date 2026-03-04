@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title layout:fragment="title">Edit Room</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Form grid layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #475569;
+        }
+        
+        .form-control, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: normal;
+            cursor: pointer;
+            padding: 5px 10px;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+        
+        .checkbox-group label:hover {
+            background: #f1f5f9;
+        }
+        
+        .current-image {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .current-image img {
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .image-preview {
+            width: 300px;
+            height: 200px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            background-size: cover;
+            background-position: center;
+            background-color: #f8fafc;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            color: #1e293b;
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        
+        .page-header p {
+            color: #64748b;
+            font-size: 16px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .text-muted {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+        
+        .required:after {
+            content: " *";
+            color: #ef4444;
+            font-weight: bold;
+        }
+        
+        .error-message {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 4px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="page-header">
+            <h1>
+                <i class="fas fa-edit" style="color: #3b82f6; margin-right: 10px;"></i>
+                Edit Room
+            </h1>
+            <p>Update room information for Room #<span th:text="${room.roomNumber}" style="font-weight: 600; color: #3b82f6;"></span></p>
+        </div>
+
+        <div class="table-container">
+            <form th:action="@{/admin/rooms/update/{id}(id=${room.id})}" method="post" id="editRoomForm">
+                <!-- Hidden ID field -->
+                <input type="hidden" name="id" th:value="${room.id}" />
+                
+                <div class="form-grid">
+                    <!-- Room Number -->
+                    <div class="form-group">
+                        <label class="required">Room Number</label>
+                        <input type="text" name="roomNumber" class="form-control" th:value="${room.roomNumber}" required maxlength="10">
+                    </div>
+                    
+                    <!-- Room Type -->
+                    <div class="form-group">
+                        <label class="required">Room Type</label>
+                        <select name="roomType" class="form-select" required>
+                            <option value="">Select Type</option>
+                            <option value="Standard" th:selected="${room.roomType == 'Standard'}">Standard</option>
+                            <option value="Deluxe" th:selected="${room.roomType == 'Deluxe'}">Deluxe</option>
+                            <option value="Suite" th:selected="${room.roomType == 'Suite'}">Suite</option>
+                            <option value="Executive" th:selected="${room.roomType == 'Executive'}">Executive</option>
+                            <option value="Family" th:selected="${room.roomType == 'Family'}">Family</option>
+                            <option value="Presidential" th:selected="${room.roomType == 'Presidential'}">Presidential</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Price per Night -->
+                    <div class="form-group">
+                        <label class="required">Price per Night ($)</label>
+                        <input type="number" name="pricePerNight" class="form-control" th:value="${room.pricePerNight}" step="0.01" min="0" required>
+                    </div>
+                    
+                    <!-- Capacity -->
+                    <div class="form-group">
+                        <label class="required">Capacity (Guests)</label>
+                        <input type="number" name="capacity" class="form-control" th:value="${room.capacity}" min="1" max="10" required>
+                    </div>
+                    
+                    <!-- Room Size -->
+                    <div class="form-group">
+                        <label class="required">Room Size (sqm)</label>
+                        <input type="number" name="size" class="form-control" th:value="${room.size}" min="0" required>
+                    </div>
+                    
+                    <!-- Bed Type -->
+                    <div class="form-group">
+                        <label class="required">Bed Type</label>
+                        <select name="bedType" class="form-select" required>
+                            <option value="">Select Bed Type</option>
+                            <option value="Single" th:selected="${room.bedType == 'Single'}">Single</option>
+                            <option value="Double" th:selected="${room.bedType == 'Double'}">Double</option>
+                            <option value="Queen" th:selected="${room.bedType == 'Queen'}">Queen</option>
+                            <option value="King" th:selected="${room.bedType == 'King'}">King</option>
+                            <option value="Twin" th:selected="${room.bedType == 'Twin'}">Twin</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Floor Number -->
+                    <div class="form-group">
+                        <label>Floor Number</label>
+                        <input type="number" name="floorNumber" class="form-control" th:value="${room.floorNumber != null ? room.floorNumber : 1}" min="1" max="50">
+                    </div>
+                    
+                    <!-- Description (full width) -->
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <textarea name="description" class="form-control" rows="3" th:text="${room.description}"></textarea>
+                    </div>
+                    
+                    <!-- Image URL -->
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        
+                        <!-- Show current image if exists -->
+                        <div th:if="${room.imageUrl != null and !room.imageUrl.isEmpty()}" class="current-image">
+                            <p><i class="fas fa-image" style="color: #3b82f6;"></i> Current Image:</p>
+                            <img th:src="${room.imageUrl}" alt="Current room image" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=No+Image';">
+                        </div>
+                        
+                        <input type="url" name="imageUrl" class="form-control" th:value="${room.imageUrl}" id="imageUrl" placeholder="https://example.com/images/room.jpg">
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="form-group">
+                        <label>Status</label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="hidden" name="available" value="false" />
+                                <input type="checkbox" name="available" value="true" th:checked="${room.available}" id="availableCheckbox"> 
+                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                Available for Booking
+                            </label>
+                            
+                            <!-- Room Status (Maintenance/Cleaning etc) -->
+                            <select name="status" class="form-select" style="width: auto; min-width: 150px;">
+                                <option value="">Normal Operation</option>
+                                <option value="maintenance" th:selected="${room.status == 'maintenance'}">Under Maintenance</option>
+                                <option value="cleaning" th:selected="${room.status == 'cleaning'}">Being Cleaned</option>
+                                <option value="out_of_order" th:selected="${room.status == 'out_of_order'}">Out of Order</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Amenities (full width) -->
+                    <div class="form-group full-width">
+                        <label>Amenities</label>
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="hidden" name="hasAc" value="false" />
+                                <input type="checkbox" name="hasAc" value="true" th:checked="${room.hasAc}" class="amenity-checkbox"> 
+                                <i class="fas fa-snowflake" style="color: #38bdf8;"></i>
+                                Air Conditioning
+                            </label>
+                            <label>
+                                <input type="hidden" name="hasMiniBar" value="false" />
+                                <input type="checkbox" name="hasMiniBar" value="true" th:checked="${room.hasMiniBar}" class="amenity-checkbox"> 
+                                <i class="fas fa-glass-whiskey" style="color: #38bdf8;"></i>
+                                Mini Bar
+                            </label>
+                            <label>
+                                <input type="hidden" name="hasTv" value="false" />
+                                <input type="checkbox" name="hasTv" value="true" th:checked="${room.hasTv}" class="amenity-checkbox"> 
+                                <i class="fas fa-tv" style="color: #38bdf8;"></i>
+                                TV
+                            </label>
+                            <label>
+                                <input type="hidden" name="hasWifi" value="false" />
+                                <input type="checkbox" name="hasWifi" value="true" th:checked="${room.hasWifi}" class="amenity-checkbox"> 
+                                <i class="fas fa-wifi" style="color: #38bdf8;"></i>
+                                WiFi
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="fas fa-save"></i> Update Room
+                    </button>
+                    <a href="/admin/rooms" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                    <a th:href="@{/admin/rooms/delete/{id}(id=${room.id})}" 
+                       class="btn btn-danger" 
+                       style="margin-left: auto;"
+                       onclick="return confirm('Are you sure you want to delete this room? This action cannot be undone.');">
+                        <i class="fas fa-trash"></i> Delete Room
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Image preview functionality
+        document.getElementById('imageUrl')?.addEventListener('change', function() {
+            const preview = document.querySelector('.current-image img');
+            if (preview) {
+                preview.src = this.value;
+            }
+        });
+
+        // Form validation
+        document.getElementById('editRoomForm')?.addEventListener('submit', function(e) {
+            const roomNumber = document.querySelector('input[name="roomNumber"]').value.trim();
+            const price = parseFloat(document.querySelector('input[name="pricePerNight"]').value);
+            const capacity = parseInt(document.querySelector('input[name="capacity"]').value);
+            const size = parseInt(document.querySelector('input[name="size"]').value);
+            const bedType = document.querySelector('select[name="bedType"]').value;
+            
+            let errors = [];
+            
+            if (!roomNumber) {
+                errors.push('Room number is required');
+            }
+            
+            if (isNaN(price) || price <= 0) {
+                errors.push('Please enter a valid price greater than 0');
+            }
+            
+            if (isNaN(capacity) || capacity < 1 || capacity > 10) {
+                errors.push('Capacity must be between 1 and 10');
+            }
+            
+            if (isNaN(size) || size <= 0) {
+                errors.push('Please enter a valid room size greater than 0');
+            }
+            
+            if (!bedType) {
+                errors.push('Please select a bed type');
+            }
+            
+            if (errors.length > 0) {
+                e.preventDefault();
+                alert('Please fix the following errors:\n- ' + errors.join('\n- '));
+            }
+        });
+
+        // Initialize amenity icons opacity
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.amenity-checkbox').forEach(checkbox => {
+                const icon = checkbox.closest('label').querySelector('i');
+                if (icon) {
+                    icon.style.opacity = checkbox.checked ? '1' : '0.5';
+                }
+                
+                checkbox.addEventListener('change', function() {
+                    const icon = this.closest('label').querySelector('i');
+                    if (icon) {
+                        icon.style.opacity = this.checked ? '1' : '0.5';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,88 +1,114 @@
 package com.example.hotelbooking.repository;
 
 import com.example.hotelbooking.model.Booking;
+import com.example.hotelbooking.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Transactional
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     
-    // Find bookings by user ID
-    List<Booking> findByUserId(Long userId);
+    // ========== BASIC FIND METHODS ==========
     
-    // Find bookings by user ID and status
-    List<Booking> findByUserIdAndStatus(Long userId, String status);
+    List<Booking> findByUser(User user);
     
-    // Find booking by reference number
-    Optional<Booking> findByBookingReference(String bookingReference);
+    List<Booking> findByUserOrderByCreatedAtDesc(User user);
     
-    // Find overlapping bookings for a room
-    @Query("SELECT b FROM Booking b WHERE " +
-           "b.room.id = :roomId AND " +
-           "b.status NOT IN ('CANCELLED', 'CHECKED_OUT') AND " +
-           "b.checkInDate <= :checkOut AND b.checkOutDate >= :checkIn")
-    List<Booking> findOverlappingBookings(
-        @Param("roomId") Long roomId,
-        @Param("checkIn") LocalDate checkIn,
-        @Param("checkOut") LocalDate checkOut
-    );
-    
-    // Find overlapping bookings excluding a specific booking
-    @Query("SELECT b FROM Booking b WHERE " +
-           "b.room.id = :roomId AND " +
-           "b.id != :excludeBookingId AND " +
-           "b.status NOT IN ('CANCELLED', 'CHECKED_OUT') AND " +
-           "b.checkInDate <= :checkOut AND b.checkOutDate >= :checkIn")
-    List<Booking> findOverlappingBookingsExcluding(
-        @Param("roomId") Long roomId,
-        @Param("checkIn") LocalDate checkIn,
-        @Param("checkOut") LocalDate checkOut,
-        @Param("excludeBookingId") Long excludeBookingId
-    );
-    
-    // Count methods
-    Long countByUserId(Long userId);
-    Long countByUserIdAndStatus(Long userId, String status);
-    Long countByStatus(String status);
-    
-    // Find by status
     List<Booking> findByStatus(String status);
     
-    // Find by status not equal
-    List<Booking> findByStatusNot(String status);
+    List<Booking> findByUserAndStatus(User user, String status);
     
-    // Find by room ID
-    List<Booking> findByRoomId(Long roomId);
+    Optional<Booking> findByBookingReference(String bookingReference);
     
-    // Calculate total revenue
-    @Query("SELECT COALESCE(SUM(b.totalPrice), 0) FROM Booking b WHERE b.status NOT IN ('CANCELLED')")
-    BigDecimal sumTotalPrice();
+    // ========== EAGER FETCH METHODS ==========
     
-    // Find upcoming bookings for user
-    List<Booking> findByUserIdAndCheckInDateAfterAndStatus(Long userId, LocalDate date, String status);
+    @Query("SELECT DISTINCT b FROM Booking b " +
+           "LEFT JOIN FETCH b.room r " +
+           "WHERE b.user = :user " +
+           "ORDER BY b.createdAt DESC")
+    List<Booking> findByUserWithRoom(@Param("user") User user);
     
-    // Find past bookings for user
-    List<Booking> findByUserIdAndCheckOutDateBefore(Long userId, LocalDate date);
+    @Query("SELECT DISTINCT b FROM Booking b " +
+           "LEFT JOIN FETCH b.room r " +
+           "WHERE b.id = :id")
+    Optional<Booking> findByIdWithRoom(@Param("id") Long id);
     
-    // Find today's check-ins
-    List<Booking> findByCheckInDateAndStatus(LocalDate checkInDate, String status);
+    // ========== AVAILABILITY CHECKS ==========
     
-    // Find today's check-outs
-    List<Booking> findByCheckOutDateAndStatus(LocalDate checkOutDate, String status);
+    /**
+     * Check if room is available for given dates
+     * Returns true if no conflicting bookings exist
+     */
+    @Query("SELECT CASE WHEN COUNT(b) = 0 THEN true ELSE false END FROM Booking b " +
+           "WHERE b.room.id = :roomId " +
+           "AND b.status != 'CANCELLED' " +
+           "AND ((b.checkInDate < :checkOut) AND (b.checkOutDate > :checkIn))")
+    boolean isRoomAvailableForDates(@Param("roomId") Long roomId,
+                                   @Param("checkIn") LocalDate checkIn,
+                                   @Param("checkOut") LocalDate checkOut);
     
-    // Optional: Search bookings by date range
-    @Query("SELECT b FROM Booking b WHERE " +
-           "b.checkInDate BETWEEN :startDate AND :endDate " +
-           "OR b.checkOutDate BETWEEN :startDate AND :endDate")
-    List<Booking> findBookingsBetweenDates(
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate
-    );
+    /**
+     * Find all overlapping bookings for a room (excluding cancelled)
+     */
+    @Query("SELECT b FROM Booking b " +
+           "WHERE b.room.id = :roomId " +
+           "AND b.status != 'CANCELLED' " +
+           "AND ((b.checkInDate < :checkOut) AND (b.checkOutDate > :checkIn))")
+    List<Booking> findOverlappingBookings(@Param("roomId") Long roomId,
+                                         @Param("checkIn") LocalDate checkIn,
+                                         @Param("checkOut") LocalDate checkOut);
+    
+    // ========== COUNT METHODS ==========
+    
+    Long countByUser(User user);
+    
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.user = :user AND b.status = 'CONFIRMED'")
+    Long countConfirmedByUser(@Param("user") User user);
+    
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.user = :user AND b.status = 'CONFIRMED' AND b.checkInDate > :today")
+    Long countUpcomingByUser(@Param("user") User user, @Param("today") LocalDate today);
+    
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.user = :user AND b.checkOutDate < :today")
+    Long countCompletedByUser(@Param("user") User user, @Param("today") LocalDate today);
+    
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.user = :user AND b.status = 'CANCELLED'")
+    Long countCancelledByUser(@Param("user") User user);
+    
+    // ========== DATE RANGE QUERIES ==========
+    
+    List<Booking> findByCheckInDateBetween(LocalDate start, LocalDate end);
+    
+    List<Booking> findByCheckOutDateBetween(LocalDate start, LocalDate end);
+    
+    @Query("SELECT b FROM Booking b WHERE b.checkInDate > :date AND b.status = 'CONFIRMED' ORDER BY b.checkInDate ASC")
+    List<Booking> findUpcomingBookings(@Param("date") LocalDate date);
+    
+    @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.room WHERE b.user = :user " +
+           "AND b.status = 'CONFIRMED' AND b.checkInDate > :today ORDER BY b.checkInDate ASC")
+    List<Booking> findUpcomingBookingsWithRoom(@Param("user") User user, @Param("today") LocalDate today);
+    
+    // ========== SUMMARY QUERIES ==========
+    
+    @Query("SELECT SUM(b.totalPrice) FROM Booking b WHERE b.user = :user AND b.status != 'CANCELLED'")
+    Long getTotalSpentByUser(@Param("user") User user);
+    
+    @Query("SELECT b FROM Booking b WHERE b.user = :user AND b.createdAt >= :since ORDER BY b.createdAt DESC")
+    List<Booking> findRecentBookingsByUser(@Param("user") User user, @Param("since") LocalDateTime since);
+    
+    // ========== DELETE METHODS (for test data) ==========
+    
+    @Transactional
+    void deleteByBookingReferenceStartingWith(String prefix);
+    
+    @Transactional
+    void deleteByBookingReferenceContaining(String text);
 }

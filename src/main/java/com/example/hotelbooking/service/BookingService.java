@@ -11,405 +11,365 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
     
     private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
-//    private final UserRepository userRepository;
+    private final UserRepository userRepository;
     
     public BookingService(BookingRepository bookingRepository, 
                          RoomRepository roomRepository,
                          UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
-//        this.userRepository = userRepository;
+        this.userRepository = userRepository;
     }
     
-    /**
-     * Create a new booking
-     */
     @Transactional
     public Booking createBooking(User user, Long roomId, 
-                               LocalDate checkIn, LocalDate checkOut,
-                               Integer guests, String specialRequests) {
+                               LocalDate checkInDate, LocalDate checkOutDate, 
+                               Integer numberOfGuests, String specialRequests) {
+        
+        System.out.println("========== CREATING BOOKING ==========");
+        System.out.println("User: " + user.getUsername() + " (ID: " + user.getId() + ")");
+        System.out.println("Room ID: " + roomId);
+        System.out.println("Check-in: " + checkInDate);
+        System.out.println("Check-out: " + checkOutDate);
+        System.out.println("Guests: " + numberOfGuests);
         
         // Validate dates
-        validateBookingDates(checkIn, checkOut);
+        if (checkInDate == null || checkOutDate == null) {
+            throw new RuntimeException("Check-in and check-out dates are required");
+        }
+        
+        if (checkInDate.isBefore(LocalDate.now())) {
+            throw new RuntimeException("Check-in date cannot be in the past");
+        }
+        
+        if (!checkOutDate.isAfter(checkInDate)) {
+            throw new RuntimeException("Check-out date must be after check-in date");
+        }
         
         // Get room
         Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new RuntimeException("Room not found"));
+            .orElseThrow(() -> new RuntimeException("Room not found with ID: " + roomId));
         
-        if (!room.isAvailable()) {
-            throw new RuntimeException("Room is not available");
+        System.out.println("Room found: " + room.getRoomNumber() + " - " + room.getRoomType());
+        System.out.println("Price per night: $" + room.getPricePerNight());
+        
+        // Check room availability
+        if (room.getAvailable() == null || !room.getAvailable()) {
+            throw new RuntimeException("Room is not available for booking");
         }
         
         // Check capacity
-        if (guests > room.getCapacity()) {
-            throw new RuntimeException("Room capacity is " + room.getCapacity() + " guests");
+        if (numberOfGuests > room.getCapacity()) {
+            throw new RuntimeException("Maximum guests for this room is " + room.getCapacity());
         }
         
-        // Check for overlapping bookings
-        if (!isRoomAvailable(roomId, checkIn, checkOut)) {
-            throw new RuntimeException("Room is already booked for selected dates");
+        // Check date availability
+        boolean available = bookingRepository.isRoomAvailableForDates(roomId, checkInDate, checkOutDate);
+        System.out.println("Room available for dates: " + available);
+        
+        if (!available) {
+            throw new RuntimeException("Room is not available for the selected dates");
         }
         
-        // Calculate total price
-        long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
+        // Calculate price
+        long nights = ChronoUnit.DAYS.between(checkInDate, checkOutDate);
+        if (nights <= 0) nights = 1;
+        
         BigDecimal totalPrice = room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
+        System.out.println("Nights: " + nights);
+        System.out.println("Total price: $" + totalPrice);
         
-        // Create booking
+        // Create new booking
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setRoom(room);
-        booking.setCheckInDate(checkIn);
-        booking.setCheckOutDate(checkOut);
-        booking.setNumberOfGuests(guests);
-        booking.setTotalPrice(totalPrice);
+        booking.setCheckInDate(checkInDate);
+        booking.setCheckOutDate(checkOutDate);
+        booking.setNumberOfGuests(numberOfGuests);
         booking.setSpecialRequests(specialRequests);
+        booking.setTotalPrice(totalPrice);
         booking.setStatus("CONFIRMED");
-        booking.setBookingReference(generateBookingReference());
         
-        return bookingRepository.save(booking);
+        // Generate booking reference
+        String bookingRef = "BK" + System.currentTimeMillis() + 
+                           UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+        booking.setBookingReference(bookingRef);
+        
+        // Set timestamps
+        LocalDateTime now = LocalDateTime.now();
+        booking.setCreatedAt(now);
+        booking.setUpdatedAt(now);
+        
+        System.out.println("Saving booking with reference: " + bookingRef);
+        
+        // Save booking
+        Booking savedBooking = bookingRepository.save(booking);
+        
+        // Flush to ensure it's written to database
+        bookingRepository.flush();
+        
+        System.out.println("Booking saved successfully!");
+        System.out.println("Booking ID: " + savedBooking.getId());
+        System.out.println("Booking Reference: " + savedBooking.getBookingReference());
+        System.out.println("========================================");
+        
+        return savedBooking;
     }
     
     /**
-     * Get booking by ID
+     * NEW METHOD: Get all bookings for admin dashboard
      */
-    public Booking getBookingById(Long id) {
-        return bookingRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+    @Transactional(readOnly = true)
+    public List<Booking> getAllBookings() {
+        System.out.println("========== GET ALL BOOKINGS ==========");
+        
+        List<Booking> bookings = bookingRepository.findAll();
+        System.out.println("Total bookings in database: " + bookings.size());
+        
+        // Log all bookings for debugging
+        for (Booking b : bookings) {
+            System.out.println("  - ID: " + b.getId() + 
+                              ", Ref: " + b.getBookingReference() + 
+                              ", Status: " + b.getStatus() + 
+                              ", Price: $" + b.getTotalPrice() +
+                              ", Created: " + b.getCreatedAt());
+        }
+        
+        // Filter out test data if needed
+        bookings = bookings.stream()
+            .filter(b -> !b.getBookingReference().startsWith("DEBUG"))
+            .filter(b -> !b.getBookingReference().startsWith("SIMPLE"))
+            .collect(Collectors.toList());
+        
+        System.out.println("After filtering test data: " + bookings.size());
+        System.out.println("========================================");
+        
+        return bookings;
     }
     
-    /**
-     * Get all bookings for a user
-     */
-    public List<Booking> getUserBookings(Long userId) {
-        return bookingRepository.findByUserId(userId);
+    @Transactional(readOnly = true)
+    public boolean isRoomAvailable(Long roomId, LocalDate checkIn, LocalDate checkOut) {
+        if (checkIn == null || checkOut == null) {
+            return false;
+        }
+        if (checkIn.isBefore(LocalDate.now())) {
+            return false;
+        }
+        if (!checkOut.isAfter(checkIn)) {
+            return false;
+        }
+        return bookingRepository.isRoomAvailableForDates(roomId, checkIn, checkOut);
     }
     
-    /**
-     * Get bookings for user with specific status
-     */
-    public List<Booking> getUserBookingsByStatus(Long userId, String status) {
-        return bookingRepository.findByUserIdAndStatus(userId, status);
+    @Transactional(readOnly = true)
+    public BigDecimal calculatePrice(Long roomId, LocalDate checkIn, LocalDate checkOut) {
+        if (checkIn == null || checkOut == null) {
+            throw new RuntimeException("Check-in and check-out dates are required");
+        }
+        
+        Room room = roomRepository.findById(roomId)
+            .orElseThrow(() -> new RuntimeException("Room not found"));
+        
+        long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
+        if (nights <= 0) nights = 1;
+        
+        return room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
     }
     
-    /**
-     * Cancel a booking
-     */
     @Transactional
     public Booking cancelBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
             .orElseThrow(() -> new RuntimeException("Booking not found"));
         
-        // Check if booking can be cancelled
         if ("CANCELLED".equals(booking.getStatus())) {
             throw new RuntimeException("Booking is already cancelled");
         }
         
-        if ("CHECKED_IN".equals(booking.getStatus())) {
-            throw new RuntimeException("Cannot cancel booking after check-in");
-        }
-        
-        // Check if check-in date has passed
         if (booking.getCheckInDate().isBefore(LocalDate.now())) {
-            throw new RuntimeException("Cannot cancel booking after check-in date");
+            throw new RuntimeException("Cannot cancel past bookings");
         }
         
         booking.setStatus("CANCELLED");
+        booking.setUpdatedAt(LocalDateTime.now());
+        
         return bookingRepository.save(booking);
     }
     
-    /**
-     * Check if a room is available for given dates
-     */
-    public boolean isRoomAvailable(Long roomId, LocalDate checkIn, LocalDate checkOut) {
-        validateBookingDates(checkIn, checkOut);
+    @Transactional(readOnly = true)
+    public Booking getBookingById(Long id) {
+        return bookingRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Booking not found with id: " + id));
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Booking> getUserBookings(User user) {
+        System.out.println("========== GET USER BOOKINGS ==========");
+        System.out.println("User ID: " + user.getId() + ", Username: " + user.getUsername());
         
-        // Check room exists and is available
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new RuntimeException("Room not found"));
+        List<Booking> bookings = bookingRepository.findByUserWithRoom(user);
+        System.out.println("Raw bookings from DB: " + bookings.size());
         
-        if (!room.isAvailable()) {
-            return false;
+        // Log all bookings before filtering
+        for (Booking b : bookings) {
+            System.out.println("  - Found: ID=" + b.getId() + 
+                              ", Ref=" + b.getBookingReference() + 
+                              ", Status=" + b.getStatus() + 
+                              ", Created=" + b.getCreatedAt());
         }
         
-        // Check for overlapping bookings
-        List<Booking> overlapping = bookingRepository.findOverlappingBookings(
-            roomId, checkIn, checkOut
-        );
+        // Filter out DEBUG bookings (test data)
+        bookings = bookings.stream()
+            .filter(b -> !b.getBookingReference().startsWith("DEBUG"))
+            .filter(b -> !b.getBookingReference().startsWith("SIMPLE"))
+            .collect(Collectors.toList());
         
-        // Filter out cancelled bookings
-        overlapping = overlapping.stream()
+        System.out.println("After filtering: " + bookings.size());
+        
+        // Initialize transient fields for display
+        bookings.forEach(Booking::initializeTransientFields);
+        
+        return bookings;
+    }
+    
+    @Transactional(readOnly = true)
+    public List<Booking> getRecentBookings(User user, int limit) {
+        System.out.println("========== GET RECENT BOOKINGS ==========");
+        System.out.println("User: " + user.getUsername());
+        System.out.println("Limit: " + limit);
+        
+        List<Booking> bookings = bookingRepository.findByUserWithRoom(user);
+        System.out.println("Total bookings found: " + bookings.size());
+        
+        // Log all bookings
+        for (Booking b : bookings) {
+            System.out.println("  - Found: " + b.getBookingReference() + 
+                              " (Created: " + b.getCreatedAt() + ")");
+        }
+        
+        // Filter out DEBUG and SIMPLE test bookings
+        bookings = bookings.stream()
+            .filter(b -> !b.getBookingReference().startsWith("DEBUG"))
+            .filter(b -> !b.getBookingReference().startsWith("SIMPLE"))
+            .collect(Collectors.toList());
+        
+        System.out.println("After filtering: " + bookings.size());
+        
+        // Initialize transient fields
+        bookings.forEach(Booking::initializeTransientFields);
+        
+        // Sort by created date descending and limit
+        List<Booking> recent = bookings.stream()
+            .sorted((b1, b2) -> {
+                if (b1.getCreatedAt() == null) return 1;
+                if (b2.getCreatedAt() == null) return -1;
+                return b2.getCreatedAt().compareTo(b1.getCreatedAt());
+            })
+            .limit(limit)
+            .collect(Collectors.toList());
+        
+        System.out.println("Returning " + recent.size() + " recent bookings:");
+        for (Booking b : recent) {
+            System.out.println("  - Returning: " + b.getBookingReference() + 
+                              " (Created: " + b.getCreatedAt() + ")");
+        }
+        System.out.println("========================================");
+        
+        return recent;
+    }
+    
+    @Transactional(readOnly = true)
+    public DashboardStatisticsWithSpent getUserDashboardStatsWithSpent(User user) {
+        List<Booking> bookings = getUserBookings(user);
+        
+        long totalBookings = bookings.size();
+        long upcomingBookings = bookings.stream()
+            .filter(b -> "CONFIRMED".equals(b.getStatus()) && b.isUpcoming())
+            .count();
+        long completedBookings = bookings.stream()
+            .filter(Booking::isCompleted)
+            .count();
+        long confirmedBookings = bookings.stream()
+            .filter(b -> "CONFIRMED".equals(b.getStatus()))
+            .count();
+        
+        // Calculate total spent (excluding cancelled)
+        BigDecimal totalSpent = bookings.stream()
             .filter(b -> !"CANCELLED".equals(b.getStatus()))
-            .toList();
+            .map(Booking::getTotalPrice)
+            .filter(price -> price != null)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
         
-        return overlapping.isEmpty();
+        System.out.println("========== DASHBOARD STATS ==========");
+        System.out.println("User: " + user.getUsername());
+        System.out.println("Total Bookings: " + totalBookings);
+        System.out.println("Upcoming: " + upcomingBookings);
+        System.out.println("Completed: " + completedBookings);
+        System.out.println("Confirmed: " + confirmedBookings);
+        System.out.println("Total Spent: $" + totalSpent);
+        System.out.println("=====================================");
+        
+        return new DashboardStatisticsWithSpent(
+            totalBookings,
+            upcomingBookings,
+            completedBookings,
+            confirmedBookings,
+            totalSpent
+        );
     }
     
-    /**
-     * Update an existing booking
-     */
-    @Transactional
-    public Booking updateBooking(Long bookingId, LocalDate newCheckIn, LocalDate newCheckOut,
-                                Integer newGuests, String specialRequests, Long userId) {
-        
-        validateBookingDates(newCheckIn, newCheckOut);
-        
-        Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
-        
-        // Verify booking belongs to user
-        if (!booking.getUser().getId().equals(userId)) {
-            throw new RuntimeException("You cannot modify this booking");
-        }
-        
-        // Check if booking can be modified
-        if ("CANCELLED".equals(booking.getStatus())) {
-            throw new RuntimeException("Cannot modify cancelled booking");
-        }
-        
-        if ("CHECKED_IN".equals(booking.getStatus())) {
-            throw new RuntimeException("Cannot modify booking after check-in");
-        }
-        
-        // Check room capacity if guests changed
-        if (newGuests > booking.getRoom().getCapacity()) {
-            throw new RuntimeException("Room capacity is " + booking.getRoom().getCapacity() + " guests");
-        }
-        
-        // If dates changed, check availability
-        if (!booking.getCheckInDate().equals(newCheckIn) || !booking.getCheckOutDate().equals(newCheckOut)) {
-            // Check if room is available for new dates (excluding this booking)
-            List<Booking> overlapping = bookingRepository.findOverlappingBookingsExcluding(
-                booking.getRoom().getId(), newCheckIn, newCheckOut, bookingId
-            );
-            
-            if (!overlapping.isEmpty()) {
-                throw new RuntimeException("Room is not available for new dates");
-            }
-            
-            booking.setCheckInDate(newCheckIn);
-            booking.setCheckOutDate(newCheckOut);
-        }
-        
-        // Update other fields
-        booking.setNumberOfGuests(newGuests);
-        booking.setSpecialRequests(specialRequests);
-        
-        // Recalculate price
-        long nights = ChronoUnit.DAYS.between(newCheckIn, newCheckOut);
-        BigDecimal totalPrice = booking.getRoom().getPricePerNight().multiply(BigDecimal.valueOf(nights));
-        booking.setTotalPrice(totalPrice);
-        
-        return bookingRepository.save(booking);
-    }
-    
-    /**
-     * Calculate price for a potential booking
-     */
-    public BigDecimal calculatePrice(Long roomId, LocalDate checkIn, LocalDate checkOut) {
-        validateBookingDates(checkIn, checkOut);
-        
-        Room room = roomRepository.findById(roomId)
-            .orElseThrow(() -> new RuntimeException("Room not found"));
-        
-        long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
-        return room.getPricePerNight().multiply(BigDecimal.valueOf(nights));
-    }
-    
-    /**
-     * Get all active bookings (not cancelled)
-     */
-    public List<Booking> getActiveBookings() {
-        return bookingRepository.findByStatusNot("CANCELLED");
-    }
-    
-    /**
-     * Get bookings for a specific room
-     */
-    public List<Booking> getBookingsByRoom(Long roomId) {
-        return bookingRepository.findByRoomId(roomId);
-    }
-    
-    /**
-     * Check in a guest
-     */
-    @Transactional
-    public Booking checkIn(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
-        
-        if (!"CONFIRMED".equals(booking.getStatus())) {
-            throw new RuntimeException("Only confirmed bookings can be checked in");
-        }
-        
-        booking.setStatus("CHECKED_IN");
-        return bookingRepository.save(booking);
-    }
-    
-    /**
-     * Check out a guest
-     */
-    @Transactional
-    public Booking checkOut(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-            .orElseThrow(() -> new RuntimeException("Booking not found"));
-        
-        if (!"CHECKED_IN".equals(booking.getStatus())) {
-            throw new RuntimeException("Only checked-in bookings can be checked out");
-        }
-        
-        booking.setStatus("CHECKED_OUT");
-        return bookingRepository.save(booking);
-    }
-    
-    /**
-     * Get booking statistics for dashboard
-     */
-    public BookingStatistics getStatistics() {
-        long totalBookings = bookingRepository.count();
-        long activeBookings = bookingRepository.countByStatus("CONFIRMED");
-        long cancelledBookings = bookingRepository.countByStatus("CANCELLED");
-        BigDecimal totalRevenue = bookingRepository.sumTotalPrice();
-        
-        return new BookingStatistics(totalBookings, activeBookings, cancelledBookings, totalRevenue);
-    }
-    
-    /**
-     * Validate booking dates
-     */
-    private void validateBookingDates(LocalDate checkIn, LocalDate checkOut) {
-        if (checkIn == null || checkOut == null) {
-            throw new RuntimeException("Check-in and check-out dates are required");
-        }
-        
-        if (checkIn.isBefore(LocalDate.now())) {
-            throw new RuntimeException("Check-in date cannot be in the past");
-        }
-        
-        if (checkOut.isBefore(checkIn) || checkOut.isEqual(checkIn)) {
-            throw new RuntimeException("Check-out date must be after check-in date");
-        }
-        
-        // Maximum booking duration (30 days)
-        if (ChronoUnit.DAYS.between(checkIn, checkOut) > 30) {
-            throw new RuntimeException("Maximum booking duration is 30 days");
-        }
-    }
-    
-    /**
-     * Generate unique booking reference
-     */
-    private String generateBookingReference() {
-        String timestamp = String.valueOf(System.currentTimeMillis()).substring(8);
-        String random = UUID.randomUUID().toString().substring(0, 4).toUpperCase();
-        return "GH" + timestamp + random;
-    }
-    
-    /**
-     * DTO for booking statistics
-     */
-    public static class BookingStatistics {
+    // DTO Classes
+    public static class DashboardStatistics {
         private final long totalBookings;
-        private final long activeBookings;
-        private final long cancelledBookings;
-        private final BigDecimal totalRevenue;
+        private final long upcomingBookings;
+        private final long completedBookings;
+        private final long confirmedBookings;
         
-        public BookingStatistics(long totalBookings, long activeBookings, 
-                                long cancelledBookings, BigDecimal totalRevenue) {
+        public DashboardStatistics(long totalBookings, long upcomingBookings, 
+                                  long completedBookings, long confirmedBookings) {
             this.totalBookings = totalBookings;
-            this.activeBookings = activeBookings;
-            this.cancelledBookings = cancelledBookings;
-            this.totalRevenue = totalRevenue;
+            this.upcomingBookings = upcomingBookings;
+            this.completedBookings = completedBookings;
+            this.confirmedBookings = confirmedBookings;
         }
         
-        public long getTotalBookings() {
-            return totalBookings;
+        public long getTotalBookings() { return totalBookings; }
+        public long getUpcomingBookings() { return upcomingBookings; }
+        public long getCompletedBookings() { return completedBookings; }
+        public long getConfirmedBookings() { return confirmedBookings; }
+    }
+    
+    public static class DashboardStatisticsWithSpent {
+        private final long totalBookings;
+        private final long upcomingBookings;
+        private final long completedBookings;
+        private final long confirmedBookings;
+        private final BigDecimal totalSpent;
+        
+        public DashboardStatisticsWithSpent(long totalBookings, long upcomingBookings, 
+                                          long completedBookings, long confirmedBookings,
+                                          BigDecimal totalSpent) {
+            this.totalBookings = totalBookings;
+            this.upcomingBookings = upcomingBookings;
+            this.completedBookings = completedBookings;
+            this.confirmedBookings = confirmedBookings;
+            this.totalSpent = totalSpent;
         }
         
-        public long getActiveBookings() {
-            return activeBookings;
-        }
-        
-        public long getCancelledBookings() {
-            return cancelledBookings;
-        }
-        
-        public BigDecimal getTotalRevenue() {
-            return totalRevenue;
-        }
+        public long getTotalBookings() { return totalBookings; }
+        public long getUpcomingBookings() { return upcomingBookings; }
+        public long getCompletedBookings() { return completedBookings; }
+        public long getConfirmedBookings() { return confirmedBookings; }
+        public BigDecimal getTotalSpent() { return totalSpent; }
     }
-    
-    /**
-     * Search bookings by criteria
-     */
-    public List<Booking> searchBookings(String bookingReference, String guestName, 
-                                       LocalDate checkInFrom, LocalDate checkInTo,
-                                       String status) {
-        if (bookingReference != null && !bookingReference.isEmpty()) {
-            Optional<Booking> booking = bookingRepository.findByBookingReference(bookingReference);
-            return booking.map(List::of).orElse(List.of());
-        }
-        
-        // This would typically be a custom query
-        // For simplicity, we'll filter in memory
-        List<Booking> allBookings = bookingRepository.findAll();
-        
-        return allBookings.stream()
-            .filter(booking -> guestName == null || guestName.isEmpty() || 
-                     (booking.getUser().getFullName() != null && 
-                      booking.getUser().getFullName().toLowerCase().contains(guestName.toLowerCase())))
-            .filter(booking -> checkInFrom == null || !booking.getCheckInDate().isBefore(checkInFrom))
-            .filter(booking -> checkInTo == null || !booking.getCheckInDate().isAfter(checkInTo))
-            .filter(booking -> status == null || status.isEmpty() || status.equals(booking.getStatus()))
-            .toList();
-    }
-    
-    /**
-     * Verify if user owns the booking
-     */
-    public boolean verifyUserBooking(Long bookingId, Long userId) {
-        Optional<Booking> booking = bookingRepository.findById(bookingId);
-        return booking.isPresent() && booking.get().getUser().getId().equals(userId);
-    }
-    
-    /**
-     * Get upcoming bookings for a user
-     */
-    public List<Booking> getUpcomingBookings(Long userId) {
-        return bookingRepository.findByUserIdAndCheckInDateAfterAndStatus(
-            userId, LocalDate.now(), "CONFIRMED");
-    }
-    
-    /**
-     * Get past bookings for a user
-     */
-    public List<Booking> getPastBookings(Long userId) {
-        return bookingRepository.findByUserIdAndCheckOutDateBefore(userId, LocalDate.now());
-    }
-    
-    /**
-     * Get today's check-ins
-     */
-    public List<Booking> getTodayCheckIns() {
-        return bookingRepository.findByCheckInDateAndStatus(
-            LocalDate.now(), "CONFIRMED");
-    }
-    
-    /**
-     * Get today's check-outs
-     */
-    public List<Booking> getTodayCheckOuts() {
-        return bookingRepository.findByCheckOutDateAndStatus(
-            LocalDate.now(), "CHECKED_IN");
-    }
-    
 }

@@ -1,63 +1,64 @@
 package com.example.hotelbooking.service;
 
-import com.example.hotelbooking.repository.UserRepository;
+import com.example.hotelbooking.model.Booking;
+import com.example.hotelbooking.repository.BookingRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
 public class StatisticsService {
     
-    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
     
-    public StatisticsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public StatisticsService(BookingRepository bookingRepository) {
+        this.bookingRepository = bookingRepository;
     }
     
-    public List<RoleStatistic> getRoleStatistics() {
-        List<RoleStatistic> stats = new ArrayList<>();
+    public BookingStatistics getStatistics() {
+        List<Booking> allBookings = bookingRepository.findAll();
         
-        // Count users with ADMIN role
-        long adminCount = userRepository.findAll().stream()
-            .filter(user -> user.getRoles().stream()
-                .anyMatch(role -> "ROLE_ADMIN".equals(role.getName())))
-            .count();
-        stats.add(new RoleStatistic("ROLE_ADMIN", adminCount));
+        long totalBookings = allBookings.size();
+        long activeBookings = 0;
+        long cancelledBookings = 0;
+        BigDecimal totalRevenue = BigDecimal.ZERO;
         
-        // Count users with STAFF role
-        long staffCount = userRepository.findAll().stream()
-            .filter(user -> user.getRoles().stream()
-                .anyMatch(role -> "ROLE_STAFF".equals(role.getName())))
-            .count();
-        stats.add(new RoleStatistic("ROLE_STAFF", staffCount));
+        for (Booking booking : allBookings) {
+            String status = booking.getStatus();
+            
+            if ("CANCELLED".equals(status)) {
+                cancelledBookings++;
+            } else if ("CONFIRMED".equals(status) || "CHECKED_IN".equals(status)) {
+                activeBookings++;
+            }
+            
+            // Sum revenue for completed bookings
+            if ("CONFIRMED".equals(status) || "CHECKED_IN".equals(status) || "CHECKED_OUT".equals(status)) {
+                if (booking.getTotalPrice() != null) {
+                    totalRevenue = totalRevenue.add(booking.getTotalPrice());
+                }
+            }
+        }
         
-        // Count users with USER role
-        long userCount = userRepository.findAll().stream()
-            .filter(user -> user.getRoles().stream()
-                .anyMatch(role -> "ROLE_USER".equals(role.getName())))
-            .count();
-        stats.add(new RoleStatistic("ROLE_USER", userCount));
-        
-        return stats;
+        return new BookingStatistics(totalBookings, activeBookings, cancelledBookings, totalRevenue);
     }
     
-    // Inner class for role statistics
-    public static class RoleStatistic {
-        private final String roleName;
-        private final long count;
+    public static class BookingStatistics {
+        private final long totalBookings;
+        private final long activeBookings;
+        private final long cancelledBookings;
+        private final BigDecimal totalRevenue;
         
-        public RoleStatistic(String roleName, long count) {
-            this.roleName = roleName;
-            this.count = count;
+        public BookingStatistics(long totalBookings, long activeBookings, 
+                                long cancelledBookings, BigDecimal totalRevenue) {
+            this.totalBookings = totalBookings;
+            this.activeBookings = activeBookings;
+            this.cancelledBookings = cancelledBookings;
+            this.totalRevenue = totalRevenue;
         }
         
-        public String getRoleName() {
-            return roleName;
-        }
-        
-        public long getCount() {
-            return count;
-        }
+        // Getters...
     }
 }

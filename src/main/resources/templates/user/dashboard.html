@@ -1,33 +1,530 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>User Dashboard</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - Grand Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        .header { background: #2c3e50; color: white; padding: 20px; border-radius: 8px; }
-        .menu a { margin-right: 15px; padding: 10px 15px; background: #3498db; color: white; 
-                  text-decoration: none; border-radius: 4px; }
-        .welcome { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        :root {
+            --primary-color: #b8860b;
+            --secondary-color: #2c3e50;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 250px;
+        }
+        
+        .sidebar-header {
+            padding: 25px 20px;
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-link {
+            color: #333;
+            padding: 12px 20px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color);
+            background-color: rgba(184, 134, 11, 0.1);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .welcome-card {
+            background: linear-gradient(135deg, var(--primary-color), #d4a017);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(184, 134, 11, 0.15);
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin: 0 auto 15px;
+            background: rgba(184, 134, 11, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .booking-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+            display: block !important;
+            visibility: visible !important;
+        }
+        
+        .booking-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(184, 134, 11, 0.15);
+        }
+        
+        .booking-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex !important;
+            align-items: center;
+            gap: 5px;
+            visibility: visible !important;
+        }
+        
+        .status-confirmed { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-cancelled { background: #f8d7da; color: #721c24; }
+        .status-checked-in { background: #cce5ff; color: #004085; }
+        .status-completed { background: #d1ecf1; color: #0c5460; }
+        
+        .btn-action {
+            padding: 6px 15px;
+            font-size: 14px;
+            display: inline-block !important;
+            visibility: visible !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #a0780a;
+            border-color: #a0780a;
+        }
+        
+        .btn-outline-primary {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .text-primary {
+            color: var(--primary-color) !important;
+        }
+        
+        .bg-primary {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .cancelled-badge {
+            background-color: #6c757d;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .booking-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #f8f0e3;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+        }
+        
+        /* Currency style */
+        .currency {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+        
+        .rupee-icon {
+            color: var(--primary-color);
+            margin-right: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .nav-text {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .stat-number {
+                font-size: 24px;
+            }
+            
+            .booking-icon {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        .filter-badge {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>User Dashboard</h1>
-        <p>Welcome, <span th:text="${username}"></span> | 
-           <a href="/logout" style="color: white;">Logout</a></p>
+    <!-- Error Messages -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" style="margin-left: 250px; margin-top: 20px; margin-right: 20px;">
+        <i class="fas fa-exclamation-circle me-2"></i>[[${error}]]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     
-    <div class="welcome">
-        <h2>Welcome to Your Dashboard</h2>
-        <p>This is your user dashboard. You can manage your bookings and profile from here.</p>
+    <!-- Success Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" style="margin-left: 250px; margin-top: 20px; margin-right: 20px;">
+        <i class="fas fa-check-circle me-2"></i>[[${success}]]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     
-    <div class="menu">
-        <a href="/user/bookings">My Bookings</a>
-        <a href="/user/profile">My Profile</a>
-        <a href="/rooms">View Rooms</a>
-        <a href="/contact">Contact Us</a>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h4><i class="fas fa-hotel me-2"></i> <span class="nav-text">My Account</span></h4>
+            <small th:text="${userFullName}">User Name</small>
+        </div>
+        
+        <nav class="nav flex-column mt-4">
+            <a class="nav-link active" th:href="@{/user/dashboard}">
+                <i class="fas fa-tachometer-alt"></i> <span class="nav-text">Dashboard</span>
+            </a>
+            <a class="nav-link" th:href="@{/bookings/my}">
+                <i class="fas fa-calendar-check"></i> <span class="nav-text">My Bookings</span>
+            </a>
+            <a class="nav-link" th:href="@{/user/profile}">
+                <i class="fas fa-user"></i> <span class="nav-text">My Profile</span>
+            </a>
+            <a class="nav-link" th:href="@{/user/settings}">
+                <i class="fas fa-cog"></i> <span class="nav-text">Settings</span>
+            </a>
+        </nav>
+        
+        <!-- LOGOUT BUTTON -->
+        <div class="mt-4 px-3">
+            <!-- FIXED: Remove CSRF from logout -->
+            <a th:href="@{/logout}" class="btn btn-outline-danger w-100">
+                <i class="fas fa-sign-out-alt"></i> <span class="nav-text">Logout</span>
+            </a>
+        </div>
     </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Welcome Card -->
+        <div class="welcome-card">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h2>Welcome back, <span th:text="${userFullName}">User</span>!</h2>
+                    <p class="mb-0">Manage your bookings and account settings here.</p>
+                </div>
+                <a th:href="@{/home}" class="btn btn-light mt-2 mt-sm-0">
+                    <i class="fas fa-plus me-2"></i>New Booking
+                </a>
+            </div>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="stat-number" th:text="${totalBookings}">0</div>
+                    <p class="text-muted mb-0">Total Bookings</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-number" th:text="${upcomingBookings}">0</div>
+                    <p class="text-muted mb-0">Upcoming</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-number" th:text="${completedBookings}">0</div>
+                    <p class="text-muted mb-0">Completed</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                    <div class="stat-number">
+                        <span class="rupee-icon">₹</span><span th:text="${totalSpent != null ? #numbers.formatDecimal(totalSpent, 1, 2) : '0.00'}">0.00</span>
+                    </div>
+                    <p class="text-muted mb-0">Total Spent</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Bookings -->
+        <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3><i class="fas fa-calendar-check me-2" style="color: var(--primary-color);"></i>Recent Bookings</h3>
+                <a th:href="@{/bookings/my}" class="btn btn-outline-primary">
+                    <i class="fas fa-eye me-2"></i>View All
+                </a>
+            </div>
+            
+            <!-- Bookings List - ORIGINAL BEAUTIFUL DESIGN (NOW VISIBLE) -->
+            <div th:if="${recentBookings != null and !recentBookings.isEmpty()}">
+                <div th:each="booking : ${recentBookings}" class="booking-card">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="d-flex align-items-start">
+                                <div class="me-3">
+                                    <div class="booking-icon">
+                                        <i class="fas fa-calendar-alt fa-2x"></i>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h5 style="color: var(--primary-color);" th:text="${booking.room != null ? booking.room.roomType : 'Room'}">Room Type</h5>
+                                    <p class="text-muted mb-1">
+                                        <i class="fas fa-calendar-alt me-2" style="color: var(--primary-color);"></i>
+                                        <span th:text="${booking.formattedCheckInDate != null ? booking.formattedCheckInDate : booking.checkInDate}">Check-in</span> - 
+                                        <span th:text="${booking.formattedCheckOutDate != null ? booking.formattedCheckOutDate : booking.checkOutDate}">Check-out</span>
+                                        • <span th:text="${booking.nights != null ? booking.nights : T(java.time.temporal.ChronoUnit).DAYS.between(booking.checkInDate, booking.checkOutDate)}">0</span> nights
+                                    </p>
+                                    <p class="mb-1">
+                                        <i class="fas fa-user me-2" style="color: var(--primary-color);"></i>
+                                        <span th:text="${booking.numberOfGuests}">0</span> guests
+                                    </p>
+                                    <p class="mb-1">
+                                        <i class="fas fa-hashtag me-2" style="color: var(--primary-color);"></i>
+                                        Booking #<span th:text="${booking.bookingReference}">REF</span>
+                                    </p>
+                                    <p class="mb-0">
+                                        <i class="fas fa-rupee-sign me-2" style="color: var(--primary-color);"></i>
+                                        Total: ₹<span th:text="${booking.totalPrice != null ? #numbers.formatDecimal(booking.totalPrice, 1, 2) : '0.00'}">0.00</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex flex-column h-100 justify-content-between align-items-end">
+                                <div class="mb-3">
+                                    <span th:class="'booking-status ' + 
+                                        ${booking.status == 'CONFIRMED' ? 'status-confirmed' : 
+                                         booking.status == 'CANCELLED' ? 'status-cancelled' : 
+                                         booking.status == 'CHECKED_IN' ? 'status-checked-in' : 
+                                         booking.status == 'COMPLETED' ? 'status-completed' : 
+                                         booking.status == 'PENDING' ? 'status-pending' : 'status-confirmed'}">
+                                        <i th:class="${booking.status == 'CONFIRMED' ? 'fas fa-check-circle me-1' : 
+                                                       booking.status == 'CANCELLED' ? 'fas fa-times-circle me-1' : 
+                                                       booking.status == 'COMPLETED' ? 'fas fa-check-double me-1' : 
+                                                       booking.status == 'PENDING' ? 'fas fa-clock me-1' : 
+                                                       booking.status == 'CHECKED_IN' ? 'fas fa-sign-in-alt me-1' : 'fas fa-info-circle me-1'}"></i>
+                                        [[${booking.status}]]
+                                    </span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a th:href="@{/bookings/view/{id}(id=${booking.id})}" 
+                                       class="btn btn-outline-primary btn-action">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    
+                                    <form th:if="${booking.status == 'CONFIRMED' and booking.checkInDate != null and booking.checkInDate.isAfter(T(java.time.LocalDate).now())}"
+                                          th:action="@{/bookings/cancel/{id}(id=${booking.id})}" 
+                                          method="post"
+                                          style="display: inline;"
+                                          onsubmit="return confirm('Are you sure you want to cancel this booking?')">
+                                        <button type="submit" class="btn btn-outline-danger btn-action">
+                                            <i class="fas fa-times"></i> Cancel
+                                        </button>
+                                    </form>
+                                    
+                                    <span th:if="${booking.status == 'CANCELLED'}" 
+                                          class="cancelled-badge">
+                                        <i class="fas fa-times-circle"></i> Cancelled
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- No bookings message -->
+            <div th:if="${recentBookings == null or recentBookings.isEmpty()}" class="text-center py-5">
+                <div style="width: 120px; height: 120px; background-color: #f8f0e3; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+                    <i class="fas fa-calendar-times fa-4x" style="color: var(--primary-color);"></i>
+                </div>
+                <h4 style="color: var(--primary-color);">No Bookings Yet</h4>
+                <p class="text-muted mb-4">You haven't made any bookings yet.</p>
+                <a th:href="@{/home}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Book Your First Stay
+                </a>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="mt-4">
+            <h3 class="mb-3"><i class="fas fa-bolt me-2" style="color: var(--primary-color);"></i>Quick Actions</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="booking-card text-center">
+                        <div class="stat-icon mx-auto">
+                            <i class="fas fa-calendar-plus"></i>
+                        </div>
+                        <h5>New Booking</h5>
+                        <p class="text-muted">Book a new room</p>
+                        <a th:href="@{/home}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>Book Now
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="booking-card text-center">
+                        <div class="stat-icon mx-auto">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <h5>Update Profile</h5>
+                        <p class="text-muted">Edit your information</p>
+                        <a th:href="@{/user/profile}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Edit Profile
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="booking-card text-center">
+                        <div class="stat-icon mx-auto">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h5>Need Help?</h5>
+                        <p class="text-muted">Contact support</p>
+                        <a href="mailto:support@grandhotel.com" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-envelope me-1"></i>Get Help
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Spending Summary Card (Optional) -->
+        <div class="mt-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="booking-card">
+                        <h5><i class="fas fa-chart-line me-2" style="color: var(--primary-color);"></i>Spending Summary</h5>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <p class="text-muted mb-1">This Year</p>
+                                <h3 style="color: var(--primary-color);">₹<span th:text="${yearlySpent != null ? #numbers.formatDecimal(yearlySpent, 1, 2) : '0.00'}">0.00</span></h3>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-1">Monthly Average</p>
+                                <h4 style="color: var(--primary-color);">₹<span th:text="${monthlyAverage != null ? #numbers.formatDecimal(monthlyAverage, 1, 2) : '0.00'}">0.00</span></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="booking-card">
+                        <h5><i class="fas fa-star me-2" style="color: var(--primary-color);"></i>Loyalty Status</h5>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <p class="text-muted mb-1">Points Earned</p>
+                                <h3 style="color: var(--primary-color);"><span th:text="${loyaltyPoints != null ? loyaltyPoints : '0'}">0</span> pts</h3>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-1">Member Since</p>
+                                <h5 style="color: var(--primary-color);" th:text="${memberSince}">2025</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                if (alert && alert.classList.contains('show')) {
+                    var bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                }
+            });
+        }, 5000);
+    </script>
 </body>
 </html>

@@ -1,133 +1,1034 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Register</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Grand Hotel · simple registration</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(145deg, #b8e1fc 0%, #d0eefd 45%, #f0f9ff 100%);
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            padding: 1.5rem;
+            position: relative;
         }
-        
-        .register-container {
-            max-width: 400px;
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.5) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 70%, rgba(173, 216, 230, 0.4) 0%, transparent 55%);
+            pointer-events: none;
+        }
+
+        .card {
             width: 100%;
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 1100px;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 40px;
+            box-shadow: 0 25px 50px -10px rgba(0, 120, 200, 0.25),
+                        0 0 0 1px rgba(255, 255, 255, 0.7) inset,
+                        0 0 0 2px rgba(135, 206, 235, 0.2);
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
-        
-        h2 {
-            color: #2c3e50;
-            margin-top: 0;
-            margin-bottom: 25px;
+
+        /* left panel — sky blue */
+        .brand-panel {
+            background: linear-gradient(135deg, #7ec8ff, #b0e0ff);
+            padding: 3rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #02457a;
+            position: relative;
+            isolation: isolate;
+        }
+
+        .brand-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 100% 0%, rgba(255,255,255,0.7) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .brand-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hotel-name {
+            font-size: 2.8rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            line-height: 1.1;
+            margin-bottom: 1rem;
+            color: #02386e;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hotel-name i {
+            font-size: 2.5rem;
+            color: white;
+            background: #02457a;
+            padding: 10px;
+            border-radius: 24px;
+            box-shadow: 0 6px 14px rgba(0,80,130,0.2);
+        }
+
+        .tagline {
+            font-size: 1.2rem;
+            font-weight: 300;
+            margin-bottom: 2.5rem;
+            color: #025091;
+            border-left: 4px solid white;
+            padding-left: 1.5rem;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 2rem 0;
+        }
+
+        .feature-list li {
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 400;
+            color: #013a62;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(2px);
+            padding: 1rem 1.5rem;
+            border-radius: 60px;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.5);
+            transition: transform 0.2s;
+        }
+
+        .feature-list li:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .feature-list i {
+            color: #02457a;
+            font-size: 1.3rem;
+            width: 28px;
             text-align: center;
         }
-        
-        .form-group {
-            margin-bottom: 20px;
+
+        .small-note {
+            margin-top: 2.5rem;
+            font-size: 0.9rem;
+            color: #015293;
+            opacity: 0.8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.3);
         }
-        
-        label {
-            display: block;
-            margin-bottom: 6px;
-            color: #555;
+
+        .small-note i {
+            color: white;
+        }
+
+        /* right panel — white registration form */
+        .register-panel {
+            background: white;
+            padding: 2.5rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .greeting {
+            margin-bottom: 2rem;
+        }
+
+        .greeting h2 {
+            font-size: 2.2rem;
             font-weight: 500;
+            color: #02386e;
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 0.5rem;
         }
-        
-        input {
+
+        .greeting p {
+            color: #64748b;
+            font-size: 1rem;
+        }
+
+        .gmail-notice {
+            background: #e6f3ff;
+            border: 1px solid #7ec8ff;
+            border-radius: 30px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #02457a;
+            font-size: 0.9rem;
+        }
+
+        .gmail-notice i {
+            color: #ea4335;
+            font-size: 1.2rem;
+        }
+
+        .message-banner {
+            padding: 1rem 1.5rem;
+            border-radius: 60px;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f0f9ff;
+            border: 1px solid #b8dff0;
+            color: #0369a1;
+        }
+
+        .message-banner.error {
+            background: #fee2e2;
+            border-color: #fecaca;
+            color: #b91c1c;
+        }
+
+        .message-banner.success {
+            background: #dcfce7;
+            border-color: #bbf7d0;
+            color: #166534;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #7c9ec0;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .input-wrapper input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
+            padding: 1rem 3rem 1rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 50px;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background-color: #f8fcff;
+            color: #0a3147;
         }
-        
-        input:focus {
+
+        .input-wrapper input:focus {
             outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+            border-color: #7ec8ff;
+            background-color: white;
+            box-shadow: 0 0 0 4px rgba(126, 200, 255, 0.25);
         }
-        
-        button {
+
+        .input-wrapper input:focus + i {
+            color: #0284c7;
+        }
+
+        .input-wrapper input::placeholder {
+            color: #94a3b8;
+            font-weight: 300;
+        }
+
+        /* Gmail hint */
+        .gmail-hint {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ea4335;
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 20px;
+            border: 1px solid #fecaca;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* Validation styles */
+        .input-wrapper input.is-invalid {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        .input-wrapper input.is-valid {
+            border-color: #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .error-message i {
+            font-size: 0.8rem;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #8ba3b9;
+            background: white;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            z-index: 3;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .password-toggle:hover {
+            color: #0284c7;
+            background: #f0f9ff;
+        }
+
+        .password-strength {
+            margin-top: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .strength-text {
+            color: #64748b;
+            font-size: 0.85rem;
+            min-width: 120px;
+        }
+
+        .strength-bar {
+            height: 6px;
+            flex: 1;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .strength-bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+            border-radius: 10px;
+        }
+
+        .strength-bar-fill.weak {
+            background-color: #ef4444;
+            width: 33.33%;
+        }
+
+        .strength-bar-fill.medium {
+            background-color: #f59e0b;
+            width: 66.66%;
+        }
+
+        .strength-bar-fill.strong {
+            background-color: #10b981;
             width: 100%;
-            padding: 12px;
-            background: #2c3e50;
+        }
+
+        .terms-group {
+            margin: 1.5rem 0 2rem;
+        }
+
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .terms-checkbox input {
+            width: 20px;
+            height: 20px;
+            accent-color: #0284c7;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        .terms-checkbox span {
+            color: #334155;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .terms-checkbox a {
+            color: #0284c7;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid #b3d9f0;
+        }
+
+        .terms-checkbox a:hover {
+            color: #02457a;
+            border-bottom-color: #02457a;
+        }
+
+        .register-button {
+            background: #0284c7;
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            padding: 1.1rem;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.2s;
+            box-shadow: 0 8px 18px -8px rgba(2, 132, 199, 0.4);
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.3);
         }
-        
-        button:hover {
-            background: #1a252f;
+
+        .register-button i {
+            font-size: 1.2rem;
         }
-        
+
+        .register-button:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -8px #0284c7;
+        }
+
+        .register-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .login-link {
             text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+            margin-top: 2rem;
+            color: #64748b;
+            font-size: 0.95rem;
         }
-        
+
         .login-link a {
-            color: #3498db;
+            color: #0284c7;
+            font-weight: 500;
             text-decoration: none;
+            margin-left: 5px;
+            border-bottom: 1px solid #b3d9f0;
         }
-        
+
         .login-link a:hover {
-            text-decoration: underline;
+            color: #02457a;
+            border-bottom-color: #02457a;
         }
-        
-        @media (max-width: 480px) {
-            .register-container {
-                padding: 20px;
+
+        .validation-summary {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 20px;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: #b91c1c;
+            display: none;
+        }
+
+        .validation-summary.show {
+            display: block;
+        }
+
+        .validation-summary ul {
+            margin: 0.8rem 0 0 1.5rem;
+        }
+
+        @media (max-width: 800px) {
+            .card {
+                grid-template-columns: 1fr;
+                max-width: 550px;
+            }
+
+            .brand-panel {
+                padding: 2rem;
+                text-align: center;
+            }
+
+            .hotel-name {
+                justify-content: center;
+            }
+
+            .feature-list li {
+                justify-content: center;
+            }
+
+            .register-panel {
+                padding: 2rem;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            
+            .register-panel {
+                padding: 1.5rem;
+            }
+
+            .hotel-name {
+                font-size: 2.2rem;
+            }
+
+            .gmail-hint {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
-    <div class="register-container">
-        <h2>Create Account</h2>
-        
-        <form th:action="@{/register}" th:object="${user}" method="post">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input id="username" th:field="*{username}" type="text" required>
+    <div class="card">
+        <!-- left: sky blue panel -->
+        <div class="brand-panel">
+            <div class="brand-content">
+                <div class="hotel-name">
+                    <i class="fas fa-building"></i> 
+                    Grand Hotel
+                </div>
+                <div class="tagline">
+                    join · experience · belong
+                </div>
+
+                <ul class="feature-list">
+                    <li><i class="fas fa-gift"></i> welcome bonus points</li>
+                    <li><i class="fas fa-arrow-up"></i> free room upgrade</li>
+                    <li><i class="fas fa-champagne-glasses"></i> welcome drink</li>
+                    <li><i class="fas fa-clock"></i> priority check-in</li>
+                </ul>
+
+                <div class="small-note">
+                    <i class="fas fa-cloud-sun"></i> 
+                    <span>sky-blue hospitality since 1928</span>
+                </div>
             </div>
-            
-            <div class="form-group">
-                <label for="fullName">Full Name</label>
-                <input id="fullName" th:field="*{fullName}" type="text" required>
+        </div>
+
+        <!-- right: registration form -->
+        <div class="register-panel">
+            <div class="greeting">
+                <h2><i class="fas fa-user-plus" style="color:#7ec8ff;"></i> create account</h2>
+                <p>join our exclusive community</p>
             </div>
-            
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input id="email" th:field="*{email}" type="email" required>
+
+            <!-- Gmail Notice -->
+           <!-- <div class="gmail-notice">
+                <i class="fab fa-google"></i>
+                <span><strong>@gmail.com</strong> email addresses only</span>
             </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input id="password" th:field="*{password}" type="password" required>
+-->
+            <!-- thymeleaf messages -->
+            <div th:if="${param.autoLoginFailed}" class="message-banner">
+                <i class="fas fa-exclamation-triangle"></i> auto-login failed · please log in manually
             </div>
-            
-            <button type="submit">Create Account</button>
-        </form>
-        
-        <div class="login-link">
-            <a th:href="@{/login}">Already have an account? Login</a>
+
+            <div th:if="${error}" class="message-banner error" th:text="${error}">
+                <i class="fas fa-exclamation-circle"></i> validation error
+            </div>
+
+            <div th:if="${success}" class="message-banner success" th:text="${success}">
+                <i class="fas fa-check-circle"></i> success
+            </div>
+
+            <!-- Validation Summary -->
+            <div class="validation-summary" id="validationSummary">
+                <i class="fas fa-exclamation-circle"></i> Please fix the following errors:
+                <ul id="errorList"></ul>
+            </div>
+
+            <form th:action="@{/register}" method="post" id="registerForm" novalidate>
+                <!-- full name & username row -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" 
+                                   name="fullName" 
+                                   id="fullName"
+                                   placeholder="full name" 
+                                   required 
+                                   minlength="2"
+                                   maxlength="100"
+                                   pattern="^[a-zA-Z\s\-']{2,100}$">
+                        </div>
+                        <div class="error-message" id="fullNameError">
+                            <i class="fas fa-exclamation-circle"></i> full name is required
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-user-tag"></i>
+                            <input type="text" 
+                                   name="username" 
+                                   id="username"
+                                   placeholder="username" 
+                                   required
+                                   minlength="3"
+                                   maxlength="50"
+                                   pattern="^[a-zA-Z0-9_]{3,50}$">
+                        </div>
+                        <div class="error-message" id="usernameError">
+                            <i class="fas fa-exclamation-circle"></i> username is required
+                        </div>
+                    </div>
+                </div>
+
+                <!-- email address - Gmail only -->
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" 
+                               name="email" 
+                               id="email"
+                               placeholder="email@gmail.com" 
+                               required
+                               maxlength="100"
+                               pattern="^[a-zA-Z0-9._%+-]+@gmail\.com$">
+                        <span class="gmail-hint">@gmail.com</span>
+                    </div>
+                    <div class="error-message" id="emailError">
+                        <i class="fas fa-exclamation-circle"></i> only @gmail.com addresses are allowed
+                    </div>
+                </div>
+
+                <!-- password & confirm password row -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="password" id="password" 
+                                   placeholder="password" required
+                                   minlength="6" maxlength="100">
+                            <span class="password-toggle" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="password-strength">
+                            <span class="strength-text">Password strength:</span>
+                            <div class="strength-bar">
+                                <div class="strength-bar-fill" id="strengthBar"></div>
+                            </div>
+                        </div>
+                        <div class="error-message" id="passwordError">
+                            <i class="fas fa-exclamation-circle"></i> password is required
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" name="confirmPassword" id="confirmPassword" 
+                                   placeholder="confirm password" required
+                                   minlength="6" maxlength="100">
+                            <span class="password-toggle" id="toggleConfirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </span>
+                        </div>
+                        <div class="error-message" id="confirmPasswordError">
+                            <i class="fas fa-exclamation-circle"></i> passwords must match
+                        </div>
+                    </div>
+                </div>
+
+                <!-- terms checkbox -->
+                <div class="terms-group">
+                    <label class="terms-checkbox">
+                        <input type="checkbox" name="terms" id="terms" required>
+                        <span>i agree to the <a href="#">terms & conditions</a> and <a href="#">privacy policy</a>.</span>
+                    </label>
+                    <div class="error-message" id="termsError">
+                        <i class="fas fa-exclamation-circle"></i> you must agree to the terms
+                    </div>
+                </div>
+
+                <button type="submit" class="register-button" id="submitBtn">
+                    <i class="fas fa-user-plus"></i> create account
+                </button>
+            </form>
+
+            <div class="login-link">
+                already a member? <a href="/login">sign in →</a>
+            </div>
         </div>
     </div>
+
+    <script>
+        (function() {
+            // Password toggle
+            const togglePassword = document.getElementById('togglePassword');
+            const toggleConfirm = document.getElementById('toggleConfirmPassword');
+            const password = document.getElementById('password');
+            const confirmPassword = document.getElementById('confirmPassword');
+
+            function setupPasswordToggle(toggleElement, inputElement) {
+                if (!toggleElement || !inputElement) return;
+                
+                toggleElement.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const currentType = inputElement.getAttribute('type');
+                    const newType = currentType === 'password' ? 'text' : 'password';
+                    inputElement.setAttribute('type', newType);
+                    
+                    const icon = this.querySelector('i');
+                    if (icon) {
+                        if (newType === 'text') {
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
+                    }
+                });
+            }
+
+            setupPasswordToggle(togglePassword, password);
+            setupPasswordToggle(toggleConfirm, confirmPassword);
+
+            // Validation patterns
+            const patterns = {
+                fullName: /^[a-zA-Z\s\-']{2,100}$/,
+                username: /^[a-zA-Z0-9_]{3,50}$/,
+                email: /^[a-zA-Z0-9._%+-]+@gmail\.com$/  // Gmail only pattern
+            };
+
+            // Get elements
+            const fullName = document.getElementById('fullName');
+            const username = document.getElementById('username');
+            const email = document.getElementById('email');
+            const terms = document.getElementById('terms');
+            const submitBtn = document.getElementById('submitBtn');
+            const validationSummary = document.getElementById('validationSummary');
+            const errorList = document.getElementById('errorList');
+
+            // Hide error messages initially
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+            });
+            validationSummary.classList.remove('show');
+
+            // Real-time validation
+            fullName.addEventListener('input', function() {
+                validateField(this, patterns.fullName, 'fullNameError', 'full name is required');
+            });
+
+            username.addEventListener('input', function() {
+                validateField(this, patterns.username, 'usernameError', 'username is required');
+            });
+
+            email.addEventListener('input', function() {
+                validateEmail();
+            });
+
+            password.addEventListener('input', function() {
+                validatePassword();
+                updatePasswordStrength();
+                if (confirmPassword.value) {
+                    validateConfirmPassword();
+                }
+            });
+
+            confirmPassword.addEventListener('input', function() {
+                validateConfirmPassword();
+            });
+
+            terms.addEventListener('change', function() {
+                validateTerms();
+            });
+
+            function validateField(field, pattern, errorId, message) {
+                const errorElement = document.getElementById(errorId);
+                const value = field.value.trim();
+                
+                if (!value) {
+                    field.classList.add('is-invalid');
+                    field.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+                    return false;
+                }
+
+                if (field.minLength && value.length < field.minLength) {
+                    field.classList.add('is-invalid');
+                    field.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> minimum ${field.minLength} characters`;
+                    return false;
+                }
+
+                if (pattern && !pattern.test(value)) {
+                    field.classList.add('is-invalid');
+                    field.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    if (field.id === 'email') {
+                        errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> only @gmail.com addresses are allowed`;
+                    } else {
+                        errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> invalid format`;
+                    }
+                    return false;
+                }
+
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                errorElement.style.display = 'none';
+                return true;
+            }
+
+            function validateEmail() {
+                const value = email.value.trim();
+                const errorElement = document.getElementById('emailError');
+                
+                if (!value) {
+                    email.classList.add('is-invalid');
+                    email.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> email is required';
+                    return false;
+                }
+
+                // Check if it ends with @gmail.com (case insensitive)
+                if (!value.toLowerCase().endsWith('@gmail.com')) {
+                    email.classList.add('is-invalid');
+                    email.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> only @gmail.com addresses are allowed';
+                    return false;
+                }
+
+                // Check local part is not empty
+                const localPart = value.split('@')[0];
+                if (!localPart || localPart.length === 0) {
+                    email.classList.add('is-invalid');
+                    email.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> invalid email format';
+                    return false;
+                }
+
+                // Check for valid characters in local part
+                const localPattern = /^[a-zA-Z0-9._%+-]+$/;
+                if (!localPattern.test(localPart)) {
+                    email.classList.add('is-invalid');
+                    email.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> email contains invalid characters';
+                    return false;
+                }
+
+                email.classList.remove('is-invalid');
+                email.classList.add('is-valid');
+                errorElement.style.display = 'none';
+                return true;
+            }
+
+            function validatePassword() {
+                const pwd = password.value;
+                const errorElement = document.getElementById('passwordError');
+                
+                if (!pwd) {
+                    password.classList.add('is-invalid');
+                    password.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> password is required';
+                    return false;
+                }
+
+                if (pwd.length < 6) {
+                    password.classList.add('is-invalid');
+                    password.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> minimum 6 characters';
+                    return false;
+                }
+
+                password.classList.remove('is-invalid');
+                password.classList.add('is-valid');
+                errorElement.style.display = 'none';
+                return true;
+            }
+
+            function validateConfirmPassword() {
+                const pwd = password.value;
+                const confirm = confirmPassword.value;
+                const errorElement = document.getElementById('confirmPasswordError');
+                
+                if (!confirm) {
+                    confirmPassword.classList.add('is-invalid');
+                    confirmPassword.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> confirm your password';
+                    return false;
+                }
+
+                if (pwd !== confirm) {
+                    confirmPassword.classList.add('is-invalid');
+                    confirmPassword.classList.remove('is-valid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> passwords do not match';
+                    return false;
+                }
+
+                confirmPassword.classList.remove('is-invalid');
+                confirmPassword.classList.add('is-valid');
+                errorElement.style.display = 'none';
+                return true;
+            }
+
+            function validateTerms() {
+                const errorElement = document.getElementById('termsError');
+                
+                if (!terms.checked) {
+                    terms.classList.add('is-invalid');
+                    errorElement.style.display = 'flex';
+                    errorElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> you must agree to the terms';
+                    return false;
+                }
+
+                terms.classList.remove('is-invalid');
+                errorElement.style.display = 'none';
+                return true;
+            }
+
+            function updatePasswordStrength() {
+                const pwd = password.value;
+                const strengthBar = document.getElementById('strengthBar');
+                
+                if (!pwd) {
+                    strengthBar.className = 'strength-bar-fill';
+                    return;
+                }
+
+                const hasUpperCase = /[A-Z]/.test(pwd);
+                const hasLowerCase = /[a-z]/.test(pwd);
+                const hasNumbers = /\d/.test(pwd);
+                const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(pwd);
+
+                let score = 0;
+                if (pwd.length >= 8) score++;
+                if (hasUpperCase && hasLowerCase) score++;
+                if (hasNumbers) score++;
+                if (hasSpecialChar) score++;
+
+                if (score >= 3 && pwd.length >= 8) {
+                    strengthBar.className = 'strength-bar-fill strong';
+                } else if (score >= 2) {
+                    strengthBar.className = 'strength-bar-fill medium';
+                } else {
+                    strengthBar.className = 'strength-bar-fill weak';
+                }
+            }
+
+            // Form submit
+            const form = document.getElementById('registerForm');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const errors = [];
+                
+                if (!validateField(fullName, patterns.fullName, 'fullNameError', 'full name is required')) 
+                    errors.push('Full name is invalid');
+                if (!validateField(username, patterns.username, 'usernameError', 'username is required')) 
+                    errors.push('Username is invalid');
+                if (!validateEmail()) 
+                    errors.push('Email must be a valid @gmail.com address');
+                if (!validatePassword()) 
+                    errors.push('Password is invalid');
+                if (!validateConfirmPassword()) 
+                    errors.push('Passwords do not match');
+                if (!validateTerms()) 
+                    errors.push('You must agree to the terms');
+
+                if (errors.length > 0) {
+                    errorList.innerHTML = errors.map(err => `<li>${err}</li>`).join('');
+                    validationSummary.classList.add('show');
+                    validationSummary.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                } else {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> creating account...';
+                    form.submit();
+                }
+            });
+
+            // Auto-focus
+            window.addEventListener('load', function() {
+                if (fullName) fullName.focus();
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title layout:fragment="title">Booking Management - Grand Hotel Admin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <style layout:fragment="custom-css">
+        /* Simple Booking Management Styles */
+        .booking-content {
+            padding: 20px;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #e9ecef;
+        }
+        
+        .stat-info h3 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+        }
+        
+        .stat-info p {
+            color: #7f8c8d;
+            margin: 0;
+            font-size: 13px;
+            text-transform: uppercase;
+        }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+        
+        .total-icon { background: #e8f0fe; color: #2563eb; }
+        .active-icon { background: #e3f9e5; color: #10b981; }
+        .pending-icon { background: #fff4e5; color: #f59e0b; }
+        .revenue-icon { background: #ede9fe; color: #8b5cf6; }
+        
+        /* Filters */
+        .filter-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+        
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .filter-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #4b5563;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .form-control, .form-select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .date-range {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #d1d5db;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            border: 1px solid #e9ecef;
+            overflow-x: auto;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .table-header h3 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .booking-count {
+            background: #f3f4f6;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 12px;
+            background: #f9fafb;
+            color: #4b5563;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #1f2937;
+        }
+        
+        /* Status Badges */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            display: inline-block;
+        }
+        
+        .status-CONFIRMED {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-PENDING {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-CHECKED_IN {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-CHECKED_OUT {
+            background: #f3f4f6;
+            color: #4b5563;
+        }
+        
+        .status-CANCELLED {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Action Buttons */
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .action-btn:hover {
+            background: #f3f4f6;
+            color: #2563eb;
+        }
+        
+        .action-btn.cancel:hover {
+            color: #dc2626;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #9ca3af;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        /* Currency style */
+        .rupee-icon {
+            color: #8b5cf6;
+            margin-right: 2px;
+        }
+        
+        .currency {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-row {
+                flex-direction: column;
+            }
+            .filter-group {
+                width: 100%;
+            }
+            .date-range {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="booking-content">
+            <!-- Page Header -->
+            <div style="margin-bottom: 20px;">
+                <h1 style="margin: 0 0 5px 0; color: #2c3e50;">Booking Management</h1>
+                <p style="color: #6b7280; margin: 0;">Manage hotel reservations and guest stays</p>
+            </div>
+
+            <!-- Quick Stats - Real Data from Database -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3 th:text="${totalBookings != null ? totalBookings : '0'}">0</h3>
+                        <p>Total Bookings</p>
+                    </div>
+                    <div class="stat-icon total-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3 th:text="${activeBookings != null ? activeBookings : '0'}">0</h3>
+                        <p>Active Stays</p>
+                    </div>
+                    <div class="stat-icon active-icon">
+                        <i class="fas fa-bed"></i>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3 th:text="${pendingBookings != null ? pendingBookings : '0'}">0</h3>
+                        <p>Pending</p>
+                    </div>
+                    <div class="stat-icon pending-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-info">
+                        <h3>
+                            <i class="fas fa-rupee-sign rupee-icon" style="font-size: 20px;"></i>
+                            <span th:text="${todayRevenue != null ? #numbers.formatDecimal(todayRevenue, 1, 2) : '0.00'}">0.00</span>
+                        </h3>
+                        <p>Today's Revenue</p>
+                    </div>
+                    <div class="stat-icon revenue-icon">
+                        <i class="fas fa-rupee-sign"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <form th:action="@{/admin/bookings}" method="get" id="bookingFilters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label><i class="fas fa-search"></i> Search</label>
+                            <input type="text" name="search" class="form-control" 
+                                   th:value="${param.search}" 
+                                   placeholder="Guest name, email, or booking ID">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label><i class="fas fa-filter"></i> Status</label>
+                            <select name="status" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="CONFIRMED" th:selected="${param.status == 'CONFIRMED'}">Confirmed</option>
+                                <option value="PENDING" th:selected="${param.status == 'PENDING'}">Pending</option>
+                                <option value="CHECKED_IN" th:selected="${param.status == 'CHECKED_IN'}">Checked In</option>
+                                <option value="CHECKED_OUT" th:selected="${param.status == 'CHECKED_OUT'}">Checked Out</option>
+                                <option value="CANCELLED" th:selected="${param.status == 'CANCELLED'}">Cancelled</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label><i class="fas fa-calendar"></i> Date Range</label>
+                            <div class="date-range">
+                                <input type="date" name="fromDate" class="form-control" 
+                                       th:value="${param.fromDate}">
+                                <span>to</span>
+                                <input type="date" name="toDate" class="form-control" 
+                                       th:value="${param.toDate}">
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label>&nbsp;</label>
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> Apply
+                                </button>
+                                <a href="/admin/bookings" class="btn btn-secondary">
+                                    <i class="fas fa-redo"></i> Reset
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Bookings List -->
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>Bookings <span class="booking-count" th:text="${bookings != null ? #lists.size(bookings) : '0'}">0</span></h3>
+                    <a th:href="@{/admin/bookings/new}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> New Booking
+                    </a>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Guest</th>
+                            <th>Room</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${bookings == null or #lists.isEmpty(bookings)}">
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fas fa-calendar-times"></i>
+                                    <h3>No Bookings Found</h3>
+                                    <p th:if="${param.search or param.status or param.fromDate or param.toDate}">No results match your filters</p>
+                                    <p th:unless="${param.search or param.status or param.fromDate or param.toDate}">Start by creating a new booking</p>
+                                    <a th:href="@{/admin/bookings/new}" class="btn btn-primary" style="margin-top: 15px;">
+                                        <i class="fas fa-plus"></i> Create Booking
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <tr th:each="booking : ${bookings}" th:if="${bookings != null}">
+                            <td>
+                                <div><strong th:text="${booking.bookingReference != null ? booking.bookingReference : 'BK' + booking.id}">BK001</strong></div>
+                                <small style="color: #6b7280;">ID: [[${booking.id}]]</small>
+                            </td>
+                            <td>
+                                <div th:if="${booking.user != null}">
+                                    <div><strong th:text="${booking.user.fullName != null ? booking.user.fullName : booking.user.username}">John Doe</strong></div>
+                                    <small style="color: #6b7280;" th:text="${booking.user.email}">john@email.com</small>
+                                </div>
+                                <div th:unless="${booking.user != null}">
+                                    <span style="color: #9ca3af;">Guest #[[${booking.guestId}]]</span>
+                                </div>
+                                <div style="font-size: 11px; color: #9ca3af;" th:text="${booking.numberOfGuests} + ' guests'">2 guests</div>
+                            </td>
+                            <td>
+                                <div th:if="${booking.room != null}">
+                                    <strong th:text="${booking.room.roomNumber}">101</strong>
+                                    <div style="font-size: 11px; color: #6b7280;" th:text="${booking.room.roomType}">Deluxe</div>
+                                </div>
+                                <div th:unless="${booking.room != null}">
+                                    <span style="color: #9ca3af;" th:text="${booking.roomType != null ? booking.roomType : 'Not assigned'}">Not assigned</span>
+                                </div>
+                            </td>
+                            <td th:text="${#temporals.format(booking.checkInDate, 'dd/MM/yyyy')}">15/01/2026</td>
+                            <td th:text="${#temporals.format(booking.checkOutDate, 'dd/MM/yyyy')}">20/01/2026</td>
+                            <td>
+                                <strong>
+                                    <i class="fas fa-rupee-sign" style="color: #2c3e50; font-size: 12px; margin-right: 2px;"></i>
+                                    <span th:text="${#numbers.formatDecimal(booking.totalPrice, 1, 2)}">1500.00</span>
+                                </strong>
+                            </td>
+                            <td>
+                                <span th:class="'status-badge status-' + ${booking.status}" th:text="${booking.status}">CONFIRMED</span>
+                            </td>
+                            <td>
+                                <div class="action-btns">
+                                    <!-- Edit Button -->
+                                   <!-- <a th:href="@{/admin/bookings/{id}/edit(id=${booking.id})}" class="action-btn" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    -->
+                                    <!-- Check In Form -->
+                                    <form th:action="@{/admin/bookings/{id}/status(id=${booking.id})}" method="post" style="display: inline;" 
+                                          th:if="${booking.status == 'CONFIRMED'}">
+                                        <input type="hidden" name="status" value="CHECKED_IN"/>
+                                        <button type="submit" class="action-btn" title="Check In"
+                                                onclick="return confirm('Check in this guest?')">
+                                            <i class="fas fa-sign-in-alt"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Check Out Form -->
+                                    <form th:action="@{/admin/bookings/{id}/status(id=${booking.id})}" method="post" style="display: inline;" 
+                                          th:if="${booking.status == 'CHECKED_IN'}">
+                                        <input type="hidden" name="status" value="CHECKED_OUT"/>
+                                        <button type="submit" class="action-btn" title="Check Out"
+                                                onclick="return confirm('Check out this guest?')">
+                                            <i class="fas fa-sign-out-alt"></i>
+                                        </button>
+                                    </form>
+                                    
+                                    <!-- Cancel Form -->
+                                    <form th:action="@{/admin/bookings/{id}/cancel(id=${booking.id})}" method="post" style="display: inline;" 
+                                          th:if="${booking.status != 'CANCELLED' and booking.status != 'CHECKED_OUT'}">
+                                        <button type="submit" class="action-btn cancel" title="Cancel"
+                                                onclick="return confirm('Cancel this booking? This cannot be undone.')">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <!-- Revenue Summary Row -->
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+                    <div style="display: flex; justify-content: flex-end; gap: 30px;">
+                        <div style="text-align: right;">
+                            <p style="color: #6b7280; margin: 0; font-size: 13px;">Total Revenue (Filtered)</p>
+                            <h3 style="color: #2c3e50; margin: 0;">
+                                <i class="fas fa-rupee-sign" style="color: #8b5cf6; font-size: 20px;"></i>
+                                <span th:text="${filteredRevenue != null ? #numbers.formatDecimal(filteredRevenue, 1, 2) : '0.00'}">0.00</span>
+                            </h3>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="color: #6b7280; margin: 0; font-size: 13px;">Average per Booking</p>
+                            <h4 style="color: #2c3e50; margin: 0;">
+                                <i class="fas fa-rupee-sign" style="color: #10b981; font-size: 16px;"></i>
+                                <span th:text="${avgBookingValue != null ? #numbers.formatDecimal(avgBookingValue, 1, 2) : '0.00'}">0.00</span>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script layout:fragment="custom-js">
+        // Set default dates if not provided
+        document.addEventListener('DOMContentLoaded', function() {
+            const fromInput = document.querySelector('input[name="fromDate"]');
+            const toInput = document.querySelector('input[name="toDate"]');
+            
+            if (fromInput && !fromInput.value) {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                fromInput.value = thirtyDaysAgo.toISOString().split('T')[0];
+            }
+            
+            if (toInput && !toInput.value) {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                toInput.value = today.toISOString().split('T')[0];
+            }
+        });
+    </script>
+</body>

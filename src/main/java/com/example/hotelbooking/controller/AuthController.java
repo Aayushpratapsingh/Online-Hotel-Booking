@@ -25,7 +25,7 @@ public class AuthController {
         if (logout != null) {
             model.addAttribute("message", "You have been logged out successfully!");
         }
-        return "login";
+        return "user/login";
     }
 
     @GetMapping("/register")
@@ -38,34 +38,5 @@ public class AuthController {
     public String saveUser(@ModelAttribute User user) {
         userService.saveUser(user);
         return "redirect:/login?registered=true";
-    }
-
-    @GetMapping("/home")
-    public String home(Model model) {
-        // Add statistics for the home page
-        model.addAttribute("totalUsers", 15); 
-        model.addAttribute("totalRooms", 50); 
-        model.addAttribute("activeBookings", 12);
-        model.addAttribute("todayRevenue", 2450.00);
-        model.addAttribute("newUsersToday", 3);
-        model.addAttribute("newBookingsToday", 5);
-        model.addAttribute("checkInsToday", 2);
-        model.addAttribute("checkOutsToday", 1);
-        return "home";
-    }
-
-    @GetMapping("/admin")
-    public String admin() { 
-        return "admin"; 
-    }
-
-    @GetMapping("/staff")
-    public String staff() { 
-        return "staff"; 
-    }
-
-    @GetMapping("/user")
-    public String userPage() { 
-        return "user"; 
     }
 }

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Grand Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #b8860b;
+            --secondary-color: #2c3e50;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 250px;
+        }
+        
+        .sidebar-header {
+            padding: 25px 20px;
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .nav-link {
+            color: #333;
+            padding: 12px 20px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color);
+            background-color: rgba(184, 134, 11, 0.1);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .page-header {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+        
+        .settings-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .settings-section {
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .settings-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .settings-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-check-label {
+            cursor: pointer;
+        }
+        
+        .btn-save {
+            padding: 10px 30px;
+        }
+        
+        .danger-zone {
+            border: 2px solid #f8d7da;
+            background-color: #f8d7da20;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar .nav-text {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Error/Success Messages -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" style="margin-left: 250px; margin-top: 20px;">
+        [[${error}]]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show" style="margin-left: 250px; margin-top: 20px;">
+        [[${success}]]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h4><i class="fas fa-hotel me-2"></i> <span class="nav-text">My Account</span></h4>
+            <small th:text="${userFullName}">[[${#authentication.name}]]</small>
+        </div>
+        
+        <nav class="nav flex-column mt-4">
+            <a class="nav-link" th:href="@{/user/dashboard}">
+                <i class="fas fa-tachometer-alt"></i> <span class="nav-text">Dashboard</span>
+            </a>
+            <a class="nav-link" th:href="@{/bookings/my}">
+                <i class="fas fa-calendar-check"></i> <span class="nav-text">My Bookings</span>
+            </a>
+            <a class="nav-link" th:href="@{/user/profile}">
+                <i class="fas fa-user"></i> <span class="nav-text">My Profile</span>
+            </a>
+            <a class="nav-link active" th:href="@{/user/settings}">
+                <i class="fas fa-cog"></i> <span class="nav-text">Settings</span>
+            </a>
+        </nav>
+        
+        <!-- LOGOUT BUTTON -->
+        <div class="mt-4 px-3">
+            <!-- FIXED: Remove CSRF from logout -->
+            <a th:href="@{/logout}" class="btn btn-outline-danger w-100">
+                <i class="fas fa-sign-out-alt"></i> <span class="nav-text">Logout</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h2>Settings</h2>
+            <p class="text-muted mb-0">Manage your account preferences and security</p>
+        </div>
+        
+        <!-- Notification Settings -->
+        <div class="settings-card">
+            <div class="settings-section">
+                <h5 class="settings-title"><i class="fas fa-bell"></i> Notification Preferences</h5>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                    <label class="form-check-label" for="emailNotifications">
+                        Email notifications for new bookings
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="promotionalEmails" checked>
+                    <label class="form-check-label" for="promotionalEmails">
+                        Promotional emails and offers
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="bookingReminders" checked>
+                    <label class="form-check-label" for="bookingReminders">
+                        Booking reminders (24 hours before check-in)
+                    </label>
+                </div>
+                <button type="button" class="btn btn-primary btn-save">Save Preferences</button>
+            </div>
+            
+            <!-- Privacy Settings -->
+            <div class="settings-section">
+                <h5 class="settings-title"><i class="fas fa-shield-alt"></i> Privacy Settings</h5>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="showProfile" checked>
+                    <label class="form-check-label" for="showProfile">
+                        Show my profile to other users
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="activityStatus" checked>
+                    <label class="form-check-label" for="activityStatus">
+                        Show when I'm online
+                    </label>
+                </div>
+                <button type="button" class="btn btn-primary btn-save">Update Privacy</button>
+            </div>
+            
+            <!-- Change Password -->
+            <div class="settings-section">
+                <h5 class="settings-title"><i class="fas fa-key"></i> Change Password</h5>
+                <!-- FIXED: Remove CSRF token from form -->
+                <form th:action="@{/user/settings/change-password}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Current Password</label>
+                        <input type="password" class="form-control" name="currentPassword" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control" name="newPassword" required>
+                        <div class="form-text">Must be at least 8 characters long</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" name="confirmPassword" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-save">Change Password</button>
+                </form>
+            </div>
+            
+            <!-- Danger Zone -->
+            <div class="settings-section danger-zone" style="border-radius: 8px; padding: 20px;">
+                <h5 class="settings-title text-danger"><i class="fas fa-exclamation-triangle"></i> Danger Zone</h5>
+                <p class="text-muted mb-4">These actions are irreversible. Please proceed with caution.</p>
+                
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <h6>Delete Account</h6>
+                        <p class="text-muted mb-2">Permanently delete your account and all associated data.</p>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                            Delete My Account
+                        </button>
+                    </div>
+                    
+                    <div>
+                        <h6>Delete All Data</h6>
+                        <p class="text-muted mb-2">Remove all your booking history and personal information.</p>
+                        <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#deleteDataModal">
+                            Delete All My Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Account Modal -->
+    <div class="modal fade" id="deleteAccountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Delete Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger"><strong>Warning: This action cannot be undone!</strong></p>
+                    <p>Are you sure you want to delete your account? This will:</p>
+                    <ul>
+                        <li>Permanently delete your account</li>
+                        <li>Remove all your booking history</li>
+                        <li>Delete all your personal information</li>
+                        <li>Cancel any upcoming bookings</li>
+                    </ul>
+                    <p>To confirm, please type <strong>DELETE MY ACCOUNT</strong> below:</p>
+                    <input type="text" class="form-control" id="confirmDeleteText" placeholder="Type DELETE MY ACCOUNT">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>Permanently Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Data Modal -->
+    <div class="modal fade" id="deleteDataModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-warning">Delete All Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-warning"><strong>Warning: This action cannot be undone!</strong></p>
+                    <p>Are you sure you want to delete all your data? This will:</p>
+                    <ul>
+                        <li>Remove all your booking history</li>
+                        <li>Delete your personal information (except account)</li>
+                        <li>Cancel any upcoming bookings</li>
+                    </ul>
+                    <p>Your account will remain active but empty.</p>
+                    <p>To confirm, please type <strong>DELETE MY DATA</strong> below:</p>
+                    <input type="text" class="form-control" id="confirmDataText" placeholder="Type DELETE MY DATA">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-warning" id="confirmDataBtn" disabled>Delete All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Auto-dismiss alerts
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // Save notification preferences
+        document.querySelectorAll('.btn-save').forEach(btn => {
+            if (!btn.type || btn.type === 'button') {
+                btn.addEventListener('click', function() {
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-check me-2"></i>Saved!';
+                        setTimeout(() => {
+                            this.innerHTML = 'Save Preferences';
+                            this.disabled = false;
+                        }, 1500);
+                    }, 1000);
+                });
+            }
+        });
+        
+        // Confirm delete account
+        const confirmDeleteText = document.getElementById('confirmDeleteText');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        
+        if (confirmDeleteText && confirmDeleteBtn) {
+            confirmDeleteText.addEventListener('input', function() {
+                confirmDeleteBtn.disabled = this.value !== 'DELETE MY ACCOUNT';
+            });
+            
+            confirmDeleteBtn.addEventListener('click', function() {
+                alert('Account deletion request submitted. This feature would call your backend.');
+            });
+        }
+        
+        // Confirm delete data
+        const confirmDataText = document.getElementById('confirmDataText');
+        const confirmDataBtn = document.getElementById('confirmDataBtn');
+        
+        if (confirmDataText && confirmDataBtn) {
+            confirmDataText.addEventListener('input', function() {
+                confirmDataBtn.disabled = this.value !== 'DELETE MY DATA';
+            });
+            
+            confirmDataBtn.addEventListener('click', function() {
+                alert('Data deletion request submitted. This feature would call your backend.');
+            });
+        }
+    </script>
+</body>
+</html>

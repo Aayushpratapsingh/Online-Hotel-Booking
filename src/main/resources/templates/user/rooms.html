@@ -1,0 +1,1070 @@
+<!--<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand Hotel - Our Rooms</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #b8860b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 8px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .nav-links li {
+            margin-left: 0;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 16px;
+        }
+        
+        .nav-links a:hover {
+            color: #b8860b;
+        }
+        
+        .nav-links a.active {
+            color: #b8860b;
+            border-bottom: 2px solid #b8860b;
+        }
+        
+        /* User Dropdown Styles */
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-menu-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .user-menu-btn:hover {
+            border-color: #b8860b;
+            background-color: #f8f0e3;
+        }
+        
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #b8860b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 180px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            margin-top: 10px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f0e3;
+            color: #b8860b;
+        }
+        
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .logout-btn {
+            color: #dc3545;
+        }
+        
+        .logout-btn:hover {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 14px;
+        }
+        
+        .btn-login {
+            background-color: transparent;
+            border: 1px solid #b8860b;
+            color: #b8860b;
+        }
+        
+        .btn-register {
+            background-color: #b8860b;
+            border: 1px solid #b8860b;
+            color: white;
+        }
+        
+        .btn-login:hover {
+            background-color: #f8f0e3;
+        }
+        
+        .btn-register:hover {
+            background-color: #a0780a;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-header h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .page-header p {
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        /* Room Filter */
+        .room-filter {
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+        }
+        
+        .filter-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .filter-title i {
+            color: #b8860b;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        
+        .filter-btn:hover {
+            border-color: #b8860b;
+            color: #b8860b;
+        }
+        
+        .filter-btn.active {
+            background-color: #b8860b;
+            color: white;
+            border-color: #b8860b;
+        }
+        
+        /* Rooms Section */
+        .rooms-section {
+            padding: 20px 0 60px;
+        }
+        
+        .section-title {
+            font-size: 28px;
+            margin-bottom: 30px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .room-count {
+            font-size: 16px;
+            color: #666;
+            font-weight: normal;
+        }
+        
+        .room-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .room-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, opacity 0.3s;
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .room-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .room-img {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .room-info {
+            padding: 25px;
+        }
+        
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .room-info h3 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .room-type {
+            color: #b8860b;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .room-price {
+            font-size: 24px;
+            color: #b8860b;
+            font-weight: 700;
+            text-align: right;
+        }
+        
+        .room-price span {
+            font-size: 14px;
+            color: #666;
+            font-weight: normal;
+            display: block;
+        }
+        
+        .room-features {
+            list-style: none;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .room-features li {
+            margin-bottom: 8px;
+            color: #555;
+            display: flex;
+            align-items: center;
+        }
+        
+        .room-features i {
+            color: #b8860b;
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+        }
+        
+        .availability-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .available {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .unavailable {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .book-room-btn {
+            background-color: #b8860b;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+            font-size: 16px;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+        
+        a.book-room-btn:hover:not(.disabled) {
+            background-color: #a0780a !important;
+        }
+        
+        .book-room-btn:disabled, .book-room-btn.disabled {
+            background-color: #6c757d !important;
+            cursor: not-allowed !important;
+            opacity: 0.7 !important;
+        }
+        
+        .book-room-btn:hover:not(:disabled):not(.disabled) {
+            background-color: #a0780a;
+        }
+        
+        .btn-login-book {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-login-book:hover {
+            background-color: #138496;
+        }
+        
+        .booking-note {
+            background-color: #f8f9fa;
+            border-left: 4px solid #17a2b8;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .booking-note i {
+            color: #17a2b8;
+            margin-right: 5px;
+        }
+        
+        /* No rooms message */
+        .no-rooms {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            color: #666;
+            font-size: 18px;
+        }
+        
+        .no-rooms i {
+            font-size: 48px;
+            color: #ddd;
+            margin-bottom: 20px;
+            display: block;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #222;
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #b8860b;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #b8860b;
+        }
+        
+        .contact-info li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .contact-info i {
+            color: #b8860b;
+            margin-right: 10px;
+            width: 20px;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 15px 0;
+            }
+            
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                z-index: 99;
+                gap: 0;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .nav-links li {
+                margin: 10px 0;
+            }
+            
+            .user-dropdown {
+                width: 100%;
+            }
+            
+            .user-menu-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .dropdown-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                margin-top: 5px;
+            }
+            
+            .auth-buttons {
+                width: 100%;
+                justify-content: center;
+                flex-direction: column;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .page-header {
+                padding: 60px 0;
+            }
+            
+            .page-header h1 {
+                font-size: 32px;
+            }
+            
+            .page-header p {
+                font-size: 16px;
+            }
+            
+            .room-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 24px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-header {
+                padding: 40px 0;
+            }
+            
+            .page-header h1 {
+                font-size: 28px;
+            }
+            
+            .filter-buttons {
+                justify-content: center;
+            }
+            
+            .room-info {
+                padding: 20px;
+            }
+            
+            .room-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .room-price {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+     Debug Info (Visible only during testing - remove in production) 
+    <div style="background: #f0f0f0; padding: 5px 10px; font-size: 12px; color: #666; border-bottom: 1px solid #ddd;">
+        <strong>Debug:</strong> 
+        Logged in: <span th:text="${isAuthenticated}">false</span> | 
+        Can Book: <span th:text="${canBook}">false</span> | 
+        User: <span th:text="${isUser}">false</span> | 
+        Staff: <span th:text="${isStaff}">false</span> | 
+        Admin: <span th:text="${isAdmin}">false</span> |
+        Rooms Count: <span th:text="${rooms != null ? rooms.size() : 0}">0</span>
+    </div>
+    
+     Header 
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/home" class="logo">
+                    <i class="fas fa-hotel"></i> Grand Hotel
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="/home">Home</a></li>
+                    <li><a href="/rooms" class="active">Rooms & Suites</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    
+                     Authentication Status 
+                    <li th:if="${isAuthenticated}">
+                        <div class="user-dropdown">
+                            <button class="user-menu-btn" id="userMenuBtn">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="user-name" th:text="${username}">User</span>
+                                <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                            </button>
+                            <div class="dropdown-menu" id="dropdownMenu">
+                                <a th:if="${isUser}" th:href="@{/user/dashboard}" class="dropdown-item">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                                <a th:if="${isStaff}" th:href="@{/staff/dashboard}" class="dropdown-item">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                                <a th:if="${isAdmin}" th:href="@{/admin/dashboard}" class="dropdown-item">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                                
+                                <a th:if="${isUser}" th:href="@{/user/my-bookings}" class="dropdown-item">
+                                    <i class="fas fa-calendar-alt"></i> My Bookings
+                                </a>
+                                
+                                <div class="dropdown-divider"></div>
+                                
+                                 Logout Link 
+                                <a th:href="@{/logout}" class="dropdown-item logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li th:unless="${isAuthenticated}">
+                        <div class="auth-buttons">
+                            <a th:href="@{/login}" class="btn btn-login">Log In</a>
+                            <a th:href="@{/register}" class="btn btn-register">Register</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+     Page Header 
+    <section class="page-header">
+        <div class="container">
+            <h1>Our Luxury Rooms & Suites</h1>
+            <p>Discover our exclusive collection of rooms designed for ultimate comfort and luxury</p>
+        </div>
+    </section>
+
+     Room Filter 
+    <section class="container">
+        <div class="room-filter">
+            <h2 class="filter-title">
+                <i class="fas fa-filter"></i> Filter by Room Type
+            </h2>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All Rooms</button>
+                
+                 Dynamic Room Types from Database 
+                <button th:each="roomType : ${roomTypes}" 
+                        class="filter-btn" 
+                        th:data-filter="${roomType}"
+                        th:text="${roomType}">
+                    Room Type
+                </button>
+                
+                <button class="filter-btn" data-filter="available">Available Now</button>
+            </div>
+        </div>
+    </section>
+
+     Rooms Section 
+    <section class="rooms-section">
+        <div class="container">
+            <h2 class="section-title">
+                Available Rooms
+                <span class="room-count" th:text="'(' + ${rooms != null ? rooms.size() : 0} + ' rooms)'"></span>
+            </h2>
+            
+            <div class="room-grid">
+                
+                 Dynamic Rooms from Database 
+                <div class="room-card" th:each="room : ${rooms}" 
+                     th:attr="data-type=${room.roomType ?: 'Standard'}, 
+                              data-available=${room.available}">
+                    <div class="room-img" 
+                         th:style="'background-image: url(' + ${room.imageUrl} ?: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80' + ')'"></div>
+                    <div class="room-info">
+                        <div class="room-header">
+                            <div>
+                                <h3 th:text="${room.roomNumber ?: 'Room ' + room.id}">Room Number</h3>
+                                <div class="room-type" th:text="${room.roomType ?: 'Standard Room'}">Room Type</div>
+                            </div>
+                            <div class="room-price">
+                                $<span th:text="${room.pricePerNight ?: '0'}">0</span>
+                                <span>per night</span>
+                            </div>
+                        </div>
+                        
+                        <ul class="room-features">
+                            <li><i class="fas fa-user-friends"></i> 
+                                <span th:text="${room.capacity ?: '2'}">2</span> guests maximum
+                            </li>
+                            <li><i class="fas fa-expand-arrows-alt"></i> 
+                                <span th:text="${room.size ?: '45'}">45</span> sqm room size
+                            </li>
+                            <li><i class="fas fa-bed"></i> 
+                                <span th:text="${room.bedType ?: 'King Size'}">King Size</span> bed
+                            </li>
+                            <li><i class="fas fa-wifi"></i> Free High-Speed WiFi</li>
+                        </ul>
+                        
+                        <div class="availability-status" th:classappend="${room.available} ? 'available' : 'unavailable'">
+                            <i class="fas" th:classappend="${room.available} ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                            <span th:text="${room.available} ? 'Available' : 'Unavailable'"></span>
+                        </div>
+                        
+                         ROLE_USER: Can book 
+                        <div th:if="${isAuthenticated and canBook}">
+                             FIXED: Changed from /booking/form/{roomId} to /bookings/book-now/{roomId} 
+                            <a th:href="@{/bookings/book-now/{roomId}(roomId=${room.id})}" 
+                               class="book-room-btn" 
+                               th:classappend="${room.available} ? '' : 'disabled'"
+                               th:disabled="${!room.available}">
+                                <i class="fas fa-calendar-check"></i> 
+                                <span th:text="${room.available} ? 'Book Now' : 'Not Available'"></span>
+                            </a>
+                        </div>
+                        
+                         Staff/Admin: Cannot book from rooms page 
+                        <div th:if="${isAuthenticated and not canBook}">
+                            <button class="book-room-btn" disabled>
+                                <i class="fas fa-info-circle"></i> Contact Front Desk
+                            </button>
+                            <div class="booking-note">
+                                <i class="fas fa-exclamation-circle"></i>
+                                Staff/Admin: Please use your dashboard for bookings
+                            </div>
+                        </div>
+                        
+                         Not logged in: Redirect to login 
+                        <div th:unless="${isAuthenticated}">
+                            <button class="btn-login-book" onclick="window.location.href='/login'">
+                                <i class="fas fa-sign-in-alt"></i> Login to Book
+                            </button>
+                            <div class="booking-note">
+                                <i class="fas fa-info-circle"></i>
+                                Please login as a regular user to book this room
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                 Fallback if no rooms from database 
+                <div th:unless="${rooms} and ${rooms.size() > 0}" class="no-rooms">
+                    <i class="fas fa-bed"></i>
+                    <p>No rooms available at the moment. Please check back later.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+     Footer 
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Grand Hotel</h3>
+                    <p>Experience luxury at its finest. Grand Hotel offers premium accommodations with world-class amenities and exceptional service.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="/home">Home</a></li>
+                        <li><a href="/rooms">Rooms & Suites</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> Tilottama-1, Shankar Nagar</li>
+                        <li><i class="fas fa-phone"></i> +977 12334567</li>
+                        <li><i class="fas fa-envelope"></i> reservations@grandhotel.com</li>
+                        <li><i class="fas fa-clock"></i> Front Desk: 24/7</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2023 Grand Hotel. All rights reserved. | Luxury Redefined Since 1925
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+                mobileMenuBtn.innerHTML = navLinks.classList.contains('active') 
+                    ? '<i class="fas fa-times"></i>' 
+                    : '<i class="fas fa-bars"></i>';
+            });
+        }
+        
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (navLinks && !navLinks.contains(e.target) && mobileMenuBtn && !mobileMenuBtn.contains(e.target)) {
+                navLinks.classList.remove('active');
+                if (mobileMenuBtn) mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+            }
+        });
+        
+        // User dropdown functionality
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        
+        if (userMenuBtn && dropdownMenu) {
+            userMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdownMenu.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!userMenuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.remove('show');
+                }
+            });
+        }
+        
+        // Room Filter Functionality
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const roomCards = document.querySelectorAll('.room-card');
+        
+        if (filterButtons.length > 0 && roomCards.length > 0) {
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    const filterValue = button.getAttribute('data-filter').toLowerCase();
+                    
+                    // Update URL with filter parameter
+                    if (filterValue !== 'all') {
+                        if (filterValue === 'available') {
+                            window.history.pushState({}, '', '/rooms?available=true');
+                        } else {
+                            window.history.pushState({}, '', '/rooms?type=' + encodeURIComponent(filterValue));
+                        }
+                    } else {
+                        window.history.pushState({}, '', '/rooms');
+                    }
+                    
+                    // Filter rooms
+                    let visibleCount = 0;
+                    roomCards.forEach(card => {
+                        const roomType = card.getAttribute('data-type')?.toLowerCase() || '';
+                        const isAvailable = card.getAttribute('data-available') === 'true';
+                        
+                        let showCard = false;
+                        
+                        if (filterValue === 'all') {
+                            showCard = true;
+                        } else if (filterValue === 'available') {
+                            showCard = isAvailable;
+                        } else {
+                            // Check if room type contains filter value (case-insensitive)
+                            showCard = roomType.toLowerCase().includes(filterValue);
+                        }
+                        
+                        if (showCard) {
+                            card.style.display = 'block';
+                            setTimeout(() => {
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0)';
+                            }, 10);
+                            visibleCount++;
+                        } else {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(20px)';
+                            setTimeout(() => {
+                                card.style.display = 'none';
+                            }, 300);
+                        }
+                    });
+                    
+                    // Update room count display
+                    const roomCountElement = document.querySelector('.room-count');
+                    if (roomCountElement) {
+                        roomCountElement.textContent = `(${visibleCount} rooms)`;
+                    }
+                });
+            });
+            
+            // Check URL parameters on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const typeParam = urlParams.get('type');
+                const availableParam = urlParams.get('available');
+                
+                let filterToActivate = 'all';
+                
+                if (typeParam) {
+                    filterToActivate = typeParam;
+                } else if (availableParam === 'true') {
+                    filterToActivate = 'available';
+                }
+                
+                // Activate corresponding filter button
+                document.querySelectorAll('.filter-btn').forEach(btn => {
+                    if (btn.getAttribute('data-filter')?.toLowerCase() === filterToActivate.toLowerCase()) {
+                        btn.click();
+                    }
+                });
+            });
+        }
+        
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                if (this.getAttribute('href') === '#') return;
+                
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                    
+                    // Close mobile menu if open
+                    if (navLinks) {
+                        navLinks.classList.remove('active');
+                        if (mobileMenuBtn) mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+                    }
+                    
+                    // Close dropdown if open
+                    if (dropdownMenu) {
+                        dropdownMenu.classList.remove('show');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>-->

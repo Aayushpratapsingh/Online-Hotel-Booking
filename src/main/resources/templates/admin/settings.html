@@ -1,0 +1,282 @@
+<!--<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+<head>
+    <title layout:fragment="title">System Settings</title>
+    <style layout:fragment="custom-css">
+        .settings-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            margin-right: 10px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: #2196F3;
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        
+        .btn-save {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .btn-reset {
+            background: #f8f9fa;
+            color: #666;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .danger-zone {
+            border: 1px solid #f8d7da;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .danger-title {
+            color: #721c24;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div layout:fragment="content">
+        <div class="dashboard-header">
+            <h1 class="h3 mb-2">System Settings</h1>
+            <p class="text-muted">Manage your hotel configuration</p>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success">
+            <span th:text="${success}"></span>
+        </div>
+        
+        <div th:if="${error}" class="alert alert-danger">
+            <span th:text="${error}"></span>
+        </div>
+
+        <form th:action="@{/admin/settings/update}" method="post">
+            
+             General 
+            <div class="settings-card">
+                <h3 class="section-title">General</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Hotel Name</label>
+                        <input type="text" class="form-input" name="hotelName" value="Grand Hotel">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Email</label>
+                        <input type="email" class="form-input" name="email" value="admin@grandhotel.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone</label>
+                        <input type="text" class="form-input" name="phone" value="+1 234 567 8900">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Currency</label>
+                        <select class="form-input" name="currency">
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                            <option value="GBP">GBP</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+             Booking Rules 
+            <div class="settings-card">
+                <h3 class="section-title">Booking Rules</h3>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label class="form-label">Check-in Time</label>
+                        <input type="time" class="form-input" name="checkInTime" value="14:00">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Check-out Time</label>
+                        <input type="time" class="form-input" name="checkOutTime" value="11:00">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Min Stay (nights)</label>
+                        <input type="number" class="form-input" name="minStay" value="1" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Max Stay (nights)</label>
+                        <input type="number" class="form-input" name="maxStay" value="30" min="1">
+                    </div>
+                </div>
+            </div>
+            
+             Features 
+            <div class="settings-card">
+                <h3 class="section-title">Features</h3>
+                <div class="toggle-group">
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="requireDeposit">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span>Require deposit</span>
+                </div>
+                <div class="toggle-group">
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="allowOnlinePayment" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span>Online payments</span>
+                </div>
+                <div class="toggle-group">
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="autoConfirm" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span>Auto-confirm bookings</span>
+                </div>
+                <div class="toggle-group">
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="emailNotifications" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span>Email notifications</span>
+                </div>
+            </div>
+            
+             Actions 
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" class="btn-reset" onclick="resetForm()">Reset</button>
+                <button type="submit" class="btn-save">Save Changes</button>
+            </div>
+        </form>
+        
+         Danger Zone 
+        <div class="danger-zone">
+            <div class="danger-title">Danger Zone</div>
+            <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                Irreversible actions. Proceed with caution.
+            </p>
+            <button type="button" class="btn-danger" onclick="clearCache()">
+                Clear System Cache
+            </button>
+        </div>
+    </div>
+
+    <script layout:fragment="custom-js">
+        function resetForm() {
+            if (confirm('Reset all settings to default?')) {
+                document.querySelector('form').reset();
+            }
+        }
+        
+        function clearCache() {
+            if (confirm('Clear system cache?')) {
+                // API call would go here
+                alert('Cache cleared.');
+            }
+        }
+    </script>
+</body>
+</html>-->

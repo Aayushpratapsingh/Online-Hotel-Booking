@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+
+# Eclipse / STS
+.settings/
+*.classpath
+*.project
+*.springBeans
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IntelliJ (optional)
+.idea/

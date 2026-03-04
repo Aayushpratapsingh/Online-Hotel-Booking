@@ -1,233 +1,936 @@
-<!DOCTYPE html>
+<!--<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Create Booking - Staff</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
             margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: white;
             padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
         }
 
         .container {
-            max-width: 700px;
-            margin: auto;
-            background: #fff;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        h1 {
-            text-align: center;
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .booking-form {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .summary-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-section h5 {
+            color: var(--secondary-color);
             margin-bottom: 20px;
-            color: #333;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
         }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+        .form-label {
+            font-weight: 600;
             color: #555;
+            margin-bottom: 8px;
         }
 
-        input, select, textarea {
-            width: 100%;
-            padding: 8px 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+        .form-control, .form-select {
+            padding: 10px 15px;
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
         }
 
         .room-option {
-            border: 1px solid #ccc;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
+            border: 2px solid #e1e5eb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
             cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
         }
 
-        .room-option input {
-            margin-right: 10px;
+        .room-option:hover {
+            border-color: #bdc3c7;
+            background-color: #f8f9fa;
         }
 
-        .booking-summary {
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
+        .room-option.selected {
+            border-color: var(--primary-color);
+            background-color: #e8f4fc;
+        }
+
+        .room-info {
+            flex: 1;
+        }
+
+        .room-price {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            min-width: 100px;
+            text-align: right;
+        }
+
+        .amenities {
+            display: flex;
+            gap: 10px;
             margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .amenity-badge {
+            background: #f1f8ff;
+            color: #0366d6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .guest-search-container {
+            position: relative;
+        }
+
+        .guest-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .guest-result {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.2s;
+        }
+
+        .guest-result:hover {
+            background-color: #f8f9fa;
+        }
+
+        .guest-result:last-child {
+            border-bottom: none;
+        }
+
+        .guest-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .guest-contact {
+            font-size: 0.9rem;
+            color: #666;
         }
 
         .summary-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
         }
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
+        .total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+            margin-top: 10px;
         }
 
         .btn-primary {
-            background-color: #4facfe;
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary-color), #2980b9);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s;
         }
 
-        .btn-secondary {
-            background-color: #ccc;
-            color: #333;
-            margin-right: 10px;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
         }
 
-        .guest-results {
-            border: 1px solid #ccc;
-            max-height: 150px;
-            overflow-y: auto;
-            margin-bottom: 15px;
+        .date-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
-        .guest-result {
-            padding: 5px;
-            cursor: pointer;
+        .date-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--secondary-color);
         }
 
-        .guest-result:hover {
-            background-color: #eee;
+        .alert-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
         }
 
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-card {
+                position: static;
+            }
+        }
     </style>
 </head>
 <body>
+     Header 
+    <div class="header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0"><i class="bi bi-calendar-plus text-primary me-2"></i>Create New Booking</h2>
+                    <p class="text-muted mb-0">Book a room for a guest</p>
+                </div>
+                <div>
+                    <a th:href="@{/staff/dashboard}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     Main Container 
     <div class="container">
-        <h1>Create Booking</h1>
-        <form th:action="@{/staff/create-booking}" method="post">
-            <!-- Guest Search -->
-            <label for="guestSearch">Guest</label>
-            <input type="text" id="guestSearch" placeholder="Search guest..." oninput="searchGuests()">
-            <div id="guestResults" class="guest-results"></div>
-            <input type="hidden" id="guestId" name="guestId">
+        <div class="alert-message" id="messageAlert"></div>
 
-            <!-- Room Selection -->
-            <label>Room</label>
-            <div class="room-option">
-                <input type="radio" name="roomId" value="101" onchange="calculateSummary()"> 101 - Deluxe Suite ($199/night)
+         Loading Spinner 
+        <div class="loading" id="loadingSpinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-            <div class="room-option">
-                <input type="radio" name="roomId" value="102" onchange="calculateSummary()"> 102 - Standard ($99/night)
+            <p class="mt-2">Loading available rooms...</p>
+        </div>
+
+         Main Form 
+        <form th:action="@{/staff/create-booking}" method="post" id="bookingForm" style="display: none;">
+            <div class="main-content">
+                 Left Column: Form 
+                <div class="booking-form">
+                     Guest Information Section 
+                    <div class="form-section">
+                        <h5><i class="bi bi-person me-2"></i>Guest Information</h5>
+                        
+                         Guest Search 
+                        <div class="mb-4">
+                            <label class="form-label">Search Existing Guest</label>
+                            <div class="guest-search-container">
+                                <input type="text" id="guestSearch" class="form-control" 
+                                       placeholder="Search by name, email, or phone..."
+                                       onkeyup="searchGuests()" autocomplete="off">
+                                <div id="guestResults" class="guest-results"></div>
+                            </div>
+                            <small class="text-muted">Start typing to search existing guests</small>
+                            <input type="hidden" id="guestId" name="guestId">
+                        </div>
+
+                         Or Create New Guest 
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="createNewGuest" onchange="toggleNewGuestForm()">
+                                <label class="form-check-label" for="createNewGuest">
+                                    Create new guest profile
+                                </label>
+                            </div>
+                        </div>
+
+                         New Guest Form (Hidden by default) 
+                        <div id="newGuestForm" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">First Name *</label>
+                                    <input type="text" id="firstName" name="firstName" class="form-control" 
+                                           placeholder="Enter first name">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Last Name *</label>
+                                    <input type="text" id="lastName" name="lastName" class="form-control" 
+                                           placeholder="Enter last name">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Email *</label>
+                                    <input type="email" id="email" name="email" class="form-control" 
+                                           placeholder="guest@example.com">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Phone *</label>
+                                    <input type="tel" id="phone" name="phone" class="form-control" 
+                                           placeholder="+1234567890">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                     Dates Section 
+                    <div class="form-section">
+                        <h5><i class="bi bi-calendar me-2"></i>Booking Dates</h5>
+                        
+                        <div class="date-inputs">
+                            <div>
+                                <label class="form-label">Check-in Date *</label>
+                                <input type="date" id="checkInDate" name="checkInDate" 
+                                       class="form-control" required
+                                       onchange="calculateNights(); loadAvailableRooms();">
+                                <div class="date-display mt-2" id="checkInDisplay"></div>
+                            </div>
+                            
+                            <div>
+                                <label class="form-label">Check-out Date *</label>
+                                <input type="date" id="checkOutDate" name="checkOutDate" 
+                                       class="form-control" required
+                                       onchange="calculateNights(); loadAvailableRooms();">
+                                <div class="date-display mt-2" id="checkOutDisplay"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="alert alert-info" role="alert">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span id="nightsInfo">Select dates to see duration</span>
+                            </div>
+                        </div>
+                    </div>
+
+                     Room Selection Section 
+                    <div class="form-section">
+                        <h5><i class="bi bi-door-open me-2"></i>Room Selection</h5>
+                        
+                         Guest Count 
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Adults *</label>
+                                <select id="adults" name="adults" class="form-select" onchange="filterRoomsByCapacity()">
+                                    <option value="1">1 Adult</option>
+                                    <option value="2" selected>2 Adults</option>
+                                    <option value="3">3 Adults</option>
+                                    <option value="4">4 Adults</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Children</label>
+                                <select id="children" name="children" class="form-select" onchange="filterRoomsByCapacity()">
+                                    <option value="0" selected>0 Children</option>
+                                    <option value="1">1 Child</option>
+                                    <option value="2">2 Children</option>
+                                    <option value="3">3 Children</option>
+                                </select>
+                            </div>
+                        </div>
+
+                         Available Rooms 
+                        <label class="form-label">Select a Room *</label>
+                        <div id="roomsContainer">
+                            <div class="text-center py-4">
+                                <i class="bi bi-door-open fs-1 text-muted mb-3"></i>
+                                <p class="text-muted">Select dates to see available rooms</p>
+                            </div>
+                        </div>
+                        
+                        <input type="hidden" id="selectedRoomId" name="roomId" required>
+                    </div>
+
+                     Special Requests 
+                    <div class="form-section">
+                        <h5><i class="bi bi-star me-2"></i>Special Requests</h5>
+                        <textarea id="specialRequests" name="specialRequests" class="form-control" 
+                                  rows="4" placeholder="Any special requirements or requests..."></textarea>
+                    </div>
+
+                     Payment Information 
+                    <div class="form-section">
+                        <h5><i class="bi bi-credit-card me-2"></i>Payment Information</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Payment Method *</label>
+                                <select id="paymentMethod" name="paymentMethod" class="form-select">
+                                    <option value="CREDIT_CARD">Credit Card</option>
+                                    <option value="DEBIT_CARD">Debit Card</option>
+                                    <option value="CASH" selected>Cash</option>
+                                    <option value="ONLINE">Online Payment</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Advance Payment</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" id="advancePayment" name="advancePayment" 
+                                           class="form-control" placeholder="0.00" min="0" 
+                                           onchange="updateBalance()">
+                                </div>
+                                <small class="text-muted">Optional: Enter advance payment amount</small>
+                            </div>
+                        </div>
+                    </div>
+
+                     Form Actions 
+                    <div class="d-flex justify-content-between pt-3">
+                        <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                            <i class="bi bi-arrow-counterclockwise me-2"></i>Reset Form
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-2"></i>Confirm Booking
+                        </button>
+                    </div>
+                </div>
+
+                 Right Column: Summary 
+                <div class="summary-card">
+                    <h4 class="mb-4"><i class="bi bi-receipt me-2"></i>Booking Summary</h4>
+                    
+                     Guest Info 
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">GUEST</h6>
+                        <div id="guestSummary">
+                            <p class="text-muted mb-0">No guest selected</p>
+                        </div>
+                    </div>
+
+                     Dates 
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">DATES</h6>
+                        <div class="summary-item">
+                            <span>Check-in:</span>
+                            <strong id="summaryCheckIn">--</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Check-out:</span>
+                            <strong id="summaryCheckOut">--</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span>Duration:</span>
+                            <strong id="summaryNights">0 nights</strong>
+                        </div>
+                    </div>
+
+                     Room 
+                    <div class="mb-4">
+                        <h6 class="text-muted mb-2">ROOM</h6>
+                        <div id="roomSummary">
+                            <p class="text-muted mb-0">No room selected</p>
+                        </div>
+                    </div>
+
+                     Cost Breakdown 
+                    <div>
+                        <h6 class="text-muted mb-2">COST BREAKDOWN</h6>
+                        <div class="summary-item">
+                            <span>Room Rate:</span>
+                            <span id="summaryRoomRate">$0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Nights:</span>
+                            <span id="summaryNightCount">0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Subtotal:</span>
+                            <span id="summarySubtotal">$0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Tax (10%):</span>
+                            <span id="summaryTax">$0</span>
+                        </div>
+                        
+                         Advance Payment 
+                        <div class="summary-item">
+                            <span>Advance Paid:</span>
+                            <span id="summaryAdvance">$0</span>
+                        </div>
+                        
+                         Balance 
+                        <div class="summary-item">
+                            <span>Balance Due:</span>
+                            <span id="summaryBalance">$0</span>
+                        </div>
+
+                         Total 
+                        <div class="summary-item total">
+                            <span>TOTAL:</span>
+                            <span id="summaryTotal">$0</span>
+                        </div>
+                    </div>
+
+                     Important Notes 
+                    <div class="mt-4 pt-3 border-top">
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            • Check-in time: 2:00 PM<br>
+                            • Check-out time: 11:00 AM<br>
+                            • Cancellation policy: 24 hours notice<br>
+                            • Taxes and fees included
+                        </small>
+                    </div>
+                </div>
             </div>
-            <div class="room-option">
-                <input type="radio" name="roomId" value="103" onchange="calculateSummary()"> 103 - Executive ($149/night)
-            </div>
-
-            <!-- Dates -->
-            <label for="checkInDate">Check-in</label>
-            <input type="date" id="checkInDate" name="checkInDate" onchange="calculateSummary()" required>
-
-            <label for="checkOutDate">Check-out</label>
-            <input type="date" id="checkOutDate" name="checkOutDate" onchange="calculateSummary()" required>
-
-            <!-- Guests -->
-            <label for="adults">Adults</label>
-            <select id="adults" name="adults" onchange="calculateSummary()">
-                <option value="1">1</option>
-                <option value="2" selected>2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-            </select>
-
-            <label for="children">Children</label>
-            <select id="children" name="children" onchange="calculateSummary()">
-                <option value="0" selected>0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-            </select>
-
-            <!-- Special Requests -->
-            <label for="specialRequests">Special Requests</label>
-            <textarea id="specialRequests" name="specialRequests" rows="3"></textarea>
-
-            <!-- Booking Summary -->
-            <div class="booking-summary">
-                <div class="summary-item"><span>Room Rate:</span> <span id="roomRate">$0</span></div>
-                <div class="summary-item"><span>Nights:</span> <span id="nights">0</span></div>
-                <div class="summary-item"><span>Subtotal:</span> <span id="subtotal">$0</span></div>
-                <div class="summary-item"><span>Tax (10%):</span> <span id="tax">$0</span></div>
-                <div class="summary-item"><strong>Total:</strong> <strong id="total">$0</strong></div>
-            </div>
-
-            <!-- Buttons -->
-            <button type="reset" class="btn btn-secondary">Clear</button>
-            <button type="submit" class="btn btn-primary">Create Booking</button>
         </form>
     </div>
 
-    <script>
-        const guests = [
-            { id: 1, name: 'John Smith', email: 'john@example.com', phone: '+1234567890' },
-            { id: 2, name: 'Sarah Johnson', email: 'sarah@example.com', phone: '+1234567891' },
-            { id: 3, name: 'Michael Brown', email: 'michael@example.com', phone: '+1234567892' }
-        ];
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // Get data from Thymeleaf/Spring Boot controller
+        var availableRooms = /*[[${availableRooms}]]*/ [];
+        var allGuests = /*[[${allGuests}]]*/ [];
+        
+        // Global variables
+        var selectedRoom = null;
+        var selectedGuest = null;
+        var nights = 0;
 
+        // Initialize with real data
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set min dates
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById('checkInDate').min = today;
+            document.getElementById('checkOutDate').min = today;
+            
+            // Set default dates
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var dayAfter = new Date();
+            dayAfter.setDate(dayAfter.getDate() + 3);
+            
+            document.getElementById('checkInDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('checkOutDate').value = dayAfter.toISOString().split('T')[0];
+            
+            // Initial calculations
+            calculateNights();
+            updateDateDisplays();
+            
+            // Load initial available rooms
+            filterRoomsByCapacity();
+            
+            // Show form
+            document.getElementById('loadingSpinner').style.display = 'none';
+            document.getElementById('bookingForm').style.display = 'block';
+        });
+
+        // Guest search with real data
         function searchGuests() {
-            const term = document.getElementById('guestSearch').value.toLowerCase();
-            const resultsDiv = document.getElementById('guestResults');
+            var term = document.getElementById('guestSearch').value.toLowerCase();
+            var resultsDiv = document.getElementById('guestResults');
             resultsDiv.innerHTML = '';
-
-            if (!term) return;
-
-            const filtered = guests.filter(g => g.name.toLowerCase().includes(term) ||
-                                                g.email.toLowerCase().includes(term) ||
-                                                g.phone.includes(term));
-            filtered.forEach(g => {
-                const div = document.createElement('div');
-                div.className = 'guest-result';
-                div.textContent = `${g.name} (${g.email})`;
-                div.onclick = () => selectGuest(g.id, g.name);
-                resultsDiv.appendChild(div);
-            });
-        }
-
-        function selectGuest(id, name) {
-            document.getElementById('guestId').value = id;
-            document.getElementById('guestSearch').value = name;
-            document.getElementById('guestResults').innerHTML = '';
-        }
-
-        function calculateSummary() {
-            const checkIn = new Date(document.getElementById('checkInDate').value);
-            const checkOut = new Date(document.getElementById('checkOutDate').value);
-            let nights = Math.ceil((checkOut - checkIn) / (1000*60*60*24));
-            if (isNaN(nights) || nights <= 0) nights = 0;
-
-            const selectedRoom = document.querySelector('input[name="roomId"]:checked');
-            let roomRate = 0;
-            if (selectedRoom) {
-                const text = selectedRoom.parentNode.textContent;
-                const match = text.match(/\$(\d+)/);
-                if (match) roomRate = parseInt(match[1]);
+            
+            if (!term) {
+                resultsDiv.style.display = 'none';
+                return;
             }
-
-            const subtotal = roomRate * nights;
-            const tax = subtotal * 0.1;
-            const total = subtotal + tax;
-
-            document.getElementById('roomRate').textContent = '$' + roomRate;
-            document.getElementById('nights').textContent = nights;
-            document.getElementById('subtotal').textContent = '$' + subtotal;
-            document.getElementById('tax').textContent = '$' + tax.toFixed(2);
-            document.getElementById('total').textContent = '$' + total.toFixed(2);
+            
+            var filtered = allGuests.filter(function(g) {
+                var fullName = g.firstName + ' ' + g.lastName;
+                return fullName.toLowerCase().includes(term) ||
+                       g.email.toLowerCase().includes(term) ||
+                       (g.phone && g.phone.includes(term));
+            });
+            
+            if (filtered.length === 0) {
+                resultsDiv.innerHTML = '<div class="guest-result text-muted">No guests found</div>';
+            } else {
+                for (var i = 0; i < filtered.length; i++) {
+                    var g = filtered[i];
+                    var div = document.createElement('div');
+                    div.className = 'guest-result';
+                    div.innerHTML = `
+                        <div class="guest-info">
+                            <div>
+                                <strong>${g.firstName} ${g.lastName}</strong><br>
+                                <small class="guest-contact">${g.email}${g.phone ? ' • ' + g.phone : ''}</small>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                    onclick="selectGuest(${g.id})">Select</button>
+                        </div>
+                    `;
+                    resultsDiv.appendChild(div);
+                }
+            }
+            
+            resultsDiv.style.display = 'block';
         }
 
-        // Set min date
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('checkInDate').min = today;
-        document.getElementById('checkOutDate').min = today;
+        // Select guest
+        function selectGuest(id) {
+            var guest = null;
+            for (var i = 0; i < allGuests.length; i++) {
+                if (allGuests[i].id === id) {
+                    guest = allGuests[i];
+                    break;
+                }
+            }
+            
+            if (!guest) return;
+            
+            selectedGuest = guest;
+            document.getElementById('guestId').value = id;
+            document.getElementById('guestSearch').value = guest.firstName + ' ' + guest.lastName;
+            document.getElementById('guestResults').style.display = 'none';
+            
+            // Update summary
+            document.getElementById('guestSummary').innerHTML = 
+                '<strong>' + guest.firstName + ' ' + guest.lastName + '</strong><br>' +
+                '<small>' + guest.email + '</small><br>' +
+                (guest.phone ? '<small>' + guest.phone + '</small>' : '');
+            
+            // Hide new guest form
+            document.getElementById('createNewGuest').checked = false;
+            document.getElementById('newGuestForm').style.display = 'none';
+            
+            updateBalance();
+        }
+
+        // Toggle new guest form
+        function toggleNewGuestForm() {
+            var checkbox = document.getElementById('createNewGuest');
+            var newGuestForm = document.getElementById('newGuestForm');
+            
+            if (checkbox.checked) {
+                newGuestForm.style.display = 'block';
+                // Clear guest selection
+                selectedGuest = null;
+                document.getElementById('guestId').value = '';
+                document.getElementById('guestSearch').value = '';
+                document.getElementById('guestSummary').innerHTML = '<p class="text-muted mb-0">No guest selected</p>';
+            } else {
+                newGuestForm.style.display = 'none';
+            }
+        }
+
+        // Filter rooms by capacity
+        function filterRoomsByCapacity() {
+            var adults = parseInt(document.getElementById('adults').value);
+            var children = parseInt(document.getElementById('children').value);
+            var totalGuests = adults + children;
+            
+            var roomsContainer = document.getElementById('roomsContainer');
+            
+            // Filter available rooms by capacity
+            var filteredRooms = availableRooms.filter(function(room) {
+                return room.capacity >= totalGuests && room.status === 'AVAILABLE';
+            });
+            
+            if (filteredRooms.length === 0) {
+                roomsContainer.innerHTML = 
+                    '<div class="text-center py-4">' +
+                        '<i class="bi bi-door-open fs-1 text-muted mb-3"></i>' +
+                        '<p class="text-muted">No available rooms for ' + totalGuests + ' guests</p>' +
+                        '<p class="text-muted">Try different dates or reduce guest count</p>' +
+                    '</div>';
+                return;
+            }
+            
+            var html = '';
+            for (var i = 0; i < filteredRooms.length; i++) {
+                var room = filteredRooms[i];
+                var selectedClass = (selectedRoom && selectedRoom.id === room.id) ? 'selected' : '';
+                var checkedAttr = (selectedRoom && selectedRoom.id === room.id) ? 'checked' : '';
+                
+                html += 
+                    '<div class="room-option ' + selectedClass + '" onclick="selectRoom(' + room.id + ')">' +
+                        '<input type="radio" name="roomRadio" ' + checkedAttr + ' style="margin-top: 3px;">' +
+                        '<div class="room-info">' +
+                            '<h6 class="mb-1">Room ' + room.roomNumber + ' - ' + room.roomType + '</h6>' +
+                            '<p class="mb-2 text-muted" style="font-size: 0.9rem;">' + (room.description || '') + '</p>' +
+                            '<div class="amenities">';
+                
+                if (room.amenities && room.amenities.length > 0) {
+                    for (var j = 0; j < room.amenities.length; j++) {
+                        html += '<span class="amenity-badge"><i class="bi bi-' + getAmenityIcon(room.amenities[j]) + '"></i> ' + room.amenities[j] + '</span>';
+                    }
+                }
+                
+                html += 
+                            '</div>' +
+                        '</div>' +
+                        '<div class="room-price">' +
+                            '$' + room.pricePerNight + '<small class="text-muted d-block">per night</small>' +
+                        '</div>' +
+                    '</div>';
+            }
+            
+            roomsContainer.innerHTML = html;
+        }
+
+        // Get amenity icon
+        function getAmenityIcon(amenity) {
+            var amenityLower = amenity.toLowerCase();
+            if (amenityLower.includes('wifi')) return 'wifi';
+            if (amenityLower.includes('tv') || amenityLower.includes('television')) return 'tv';
+            if (amenityLower.includes('ac') || amenityLower.includes('air')) return 'snow';
+            if (amenityLower.includes('breakfast')) return 'cup-straw';
+            if (amenityLower.includes('parking')) return 'car-front';
+            if (amenityLower.includes('pool')) return 'water';
+            return 'check-circle';
+        }
+
+        // Select room
+        function selectRoom(roomId) {
+            selectedRoom = null;
+            for (var i = 0; i < availableRooms.length; i++) {
+                if (availableRooms[i].id === roomId) {
+                    selectedRoom = availableRooms[i];
+                    break;
+                }
+            }
+            
+            if (!selectedRoom) return;
+            
+            // Update UI
+            var roomOptions = document.querySelectorAll('.room-option');
+            for (var i = 0; i < roomOptions.length; i++) {
+                roomOptions[i].classList.remove('selected');
+            }
+            
+            var selectedOption = null;
+            for (var i = 0; i < roomOptions.length; i++) {
+                if (roomOptions[i].getAttribute('onclick').includes('selectRoom(' + roomId + ')')) {
+                    selectedOption = roomOptions[i];
+                    break;
+                }
+            }
+            
+            if (selectedOption) {
+                selectedOption.classList.add('selected');
+                var radio = selectedOption.querySelector('input[type="radio"]');
+                if (radio) radio.checked = true;
+            }
+            
+            document.getElementById('selectedRoomId').value = roomId;
+            
+            // Update room summary
+            document.getElementById('roomSummary').innerHTML = 
+                '<strong>Room ' + selectedRoom.roomNumber + ' - ' + selectedRoom.roomType + '</strong><br>' +
+                '<small>' + (selectedRoom.description || '') + '</small><br>' +
+                '<small>Capacity: ' + selectedRoom.capacity + ' guests</small>';
+            
+            calculateSummary();
+        }
+
+        // Calculate nights
+        function calculateNights() {
+            var checkIn = document.getElementById('checkInDate').value;
+            var checkOut = document.getElementById('checkOutDate').value;
+            
+            if (checkIn && checkOut) {
+                var start = new Date(checkIn);
+                var end = new Date(checkOut);
+                var diffTime = Math.abs(end - start);
+                nights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                document.getElementById('nightsInfo').innerHTML = 
+                    '<i class="bi bi-info-circle me-2"></i>Booking duration: ' + nights + ' night' + (nights > 1 ? 's' : '');
+                
+                updateDateDisplays();
+                calculateSummary();
+            } else {
+                document.getElementById('nightsInfo').innerHTML = 
+                    '<i class="bi bi-info-circle me-2"></i>Select dates to see duration';
+            }
+        }
+
+        // Update date displays
+        function updateDateDisplays() {
+            var checkIn = document.getElementById('checkInDate').value;
+            var checkOut = document.getElementById('checkOutDate').value;
+            
+            if (checkIn) {
+                var date = new Date(checkIn);
+                document.getElementById('checkInDisplay').innerHTML = date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                document.getElementById('summaryCheckIn').innerHTML = date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+            
+            if (checkOut) {
+                var date = new Date(checkOut);
+                document.getElementById('checkOutDisplay').innerHTML = date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                document.getElementById('summaryCheckOut').innerHTML = date.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+            
+            if (nights > 0) {
+                document.getElementById('summaryNights').innerHTML = nights + ' night' + (nights > 1 ? 's' : '');
+                document.getElementById('summaryNightCount').innerHTML = nights;
+            }
+        }
+
+        // Calculate summary
+        function calculateSummary() {
+            if (!selectedRoom || nights === 0) return;
+            
+            var roomRate = selectedRoom.pricePerNight;
+            var subtotal = roomRate * nights;
+            var tax = subtotal * 0.10;
+            var total = subtotal + tax;
+            var advance = parseFloat(document.getElementById('advancePayment').value) || 0;
+            var balance = total - advance;
+            
+            document.getElementById('summaryRoomRate').innerHTML = '$' + roomRate.toFixed(2);
+            document.getElementById('summarySubtotal').innerHTML = '$' + subtotal.toFixed(2);
+            document.getElementById('summaryTax').innerHTML = '$' + tax.toFixed(2);
+            document.getElementById('summaryTotal').innerHTML = '$' + total.toFixed(2);
+            document.getElementById('summaryAdvance').innerHTML = '$' + advance.toFixed(2);
+            document.getElementById('summaryBalance').innerHTML = '$' + balance.toFixed(2);
+        }
+
+        // Update balance when advance payment changes
+        function updateBalance() {
+            calculateSummary();
+        }
+
+        // Load available rooms
+        function loadAvailableRooms() {
+            // This would typically make an AJAX call to get available rooms for selected dates
+            // For now, just filter existing rooms
+            filterRoomsByCapacity();
+        }
+
+        // Reset form
+        function resetForm() {
+            // Reset form fields
+            document.getElementById('bookingForm').reset();
+            
+            // Reset global variables
+            selectedRoom = null;
+            selectedGuest = null;
+            
+            // Reset displays
+            document.getElementById('guestSummary').innerHTML = '<p class="text-muted mb-0">No guest selected</p>';
+            document.getElementById('roomSummary').innerHTML = '<p class="text-muted mb-0">No room selected</p>';
+            document.getElementById('guestResults').style.display = 'none';
+            document.getElementById('newGuestForm').style.display = 'none';
+            document.getElementById('createNewGuest').checked = false;
+            
+            // Reset dates to defaults
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var dayAfter = new Date();
+            dayAfter.setDate(dayAfter.getDate() + 3);
+            
+            document.getElementById('checkInDate').value = tomorrow.toISOString().split('T')[0];
+            document.getElementById('checkOutDate').value = dayAfter.toISOString().split('T')[0];
+            
+            // Recalculate
+            calculateNights();
+            filterRoomsByCapacity();
+        }
+
+        // Hide guest results when clicking outside
+        document.addEventListener('click', function(event) {
+            var searchContainer = document.querySelector('.guest-search-container');
+            var results = document.getElementById('guestResults');
+            
+            if (searchContainer && !searchContainer.contains(event.target)) {
+                results.style.display = 'none';
+            }
+        });
+        /*]]>*/
     </script>
 </body>
-</html>
+</html>-->

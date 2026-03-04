@@ -1,0 +1,1503 @@
+<!--<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand Hotel - Book Room</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 700;
+            color: #b8860b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 8px;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .nav-links li {
+            margin-left: 0;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+            font-size: 16px;
+        }
+        
+        .nav-links a:hover {
+            color: #b8860b;
+        }
+        
+        .nav-links a.active {
+            color: #b8860b;
+            border-bottom: 2px solid #b8860b;
+        }
+        
+        /* User Dropdown Styles */
+        .user-dropdown {
+            position: relative;
+        }
+        
+        .user-menu-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 6px 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .user-menu-btn:hover {
+            border-color: #b8860b;
+            background-color: #f8f0e3;
+        }
+        
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #b8860b;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        
+        .user-name {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            min-width: 180px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            z-index: 1000;
+            margin-top: 10px;
+            overflow: hidden;
+            border: 1px solid #eee;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.3s;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f8f0e3;
+            color: #b8860b;
+        }
+        
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        .logout-btn {
+            color: #dc3545;
+        }
+        
+        .logout-btn:hover {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            font-size: 14px;
+        }
+        
+        .btn-login {
+            background-color: transparent;
+            border: 1px solid #b8860b;
+            color: #b8860b;
+        }
+        
+        .btn-register {
+            background-color: #b8860b;
+            border: 1px solid #b8860b;
+            color: white;
+        }
+        
+        .btn-login:hover {
+            background-color: #f8f0e3;
+        }
+        
+        .btn-register:hover {
+            background-color: #a0780a;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #333;
+            cursor: pointer;
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-header h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .page-header p {
+            font-size: 18px;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        /* Booking Form */
+        .booking-container {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+        
+        .room-details {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .room-details h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #b8860b;
+        }
+        
+        .room-image {
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .room-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .info-item i {
+            color: #b8860b;
+            font-size: 18px;
+            width: 24px;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .room-description {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .room-description h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .room-description p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        /* Booking Form */
+        .booking-form {
+            flex: 1;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .booking-form h2 {
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: #333;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #b8860b;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-group label i {
+            color: #b8860b;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: #b8860b;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
+        }
+        
+        .form-control[readonly] {
+            background-color: #f8f9fa;
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .booking-summary {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .booking-summary h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        
+        .summary-label {
+            color: #666;
+        }
+        
+        .summary-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .total-price {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #b8860b;
+            font-size: 20px;
+            font-weight: 700;
+            color: #b8860b;
+        }
+        
+        .btn-submit {
+            background-color: #b8860b;
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            border-radius: 6px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-submit:hover {
+            background-color: #a0780a;
+        }
+        
+        .btn-submit:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .alert-danger i {
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .alert-info i {
+            color: #0c5460;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #222;
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 40px;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-column h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #b8860b;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #b8860b;
+        }
+        
+        .contact-info li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .contact-info i {
+            color: #b8860b;
+            margin-right: 10px;
+            width: 20px;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #444;
+            color: #aaa;
+            font-size: 14px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .booking-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            
+            .room-details, .booking-form {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 15px 0;
+            }
+            
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background-color: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                z-index: 99;
+                gap: 0;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            .nav-links li {
+                margin: 10px 0;
+            }
+            
+            .user-dropdown {
+                width: 100%;
+            }
+            
+            .user-menu-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .dropdown-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                margin-top: 5px;
+            }
+            
+            .auth-buttons {
+                width: 100%;
+                justify-content: center;
+                flex-direction: column;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .page-header {
+                padding: 40px 0;
+            }
+            
+            .page-header h1 {
+                font-size: 32px;
+            }
+            
+            .page-header p {
+                font-size: 16px;
+            }
+            
+            .room-info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .page-header h1 {
+                font-size: 28px;
+            }
+            
+            .room-details, .booking-form {
+                padding: 20px;
+            }
+            
+            .room-image {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+     Header 
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/home" class="logo">
+                    <i class="fas fa-hotel"></i> Grand Hotel
+                </a>
+                
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                
+                <ul class="nav-links" id="navLinks">
+                    <li><a href="/home">Home</a></li>
+                    <li><a href="/rooms">Rooms & Suites</a></li>
+                    <li><a href="#services">Services</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                    
+                     Authentication Status 
+                    <li th:if="${isAuthenticated}">
+                        <div class="user-dropdown">
+                            <button class="user-menu-btn" id="userMenuBtn">
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="user-name" th:text="${username}">User</span>
+                                <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                            </button>
+                            <div class="dropdown-menu" id="dropdownMenu">
+                                <a th:if="${isUser}" th:href="@{/user/dashboard}" class="dropdown-item">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                                <a th:if="${isStaff}" th:href="@{/staff/dashboard}" class="dropdown-item">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                                <a th:if="${isAdmin}" th:href="@{/admin/dashboard}" class="dropdown-item">
+                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                </a>
+                                
+                                <a th:if="${isUser}" th:href="@{/user/my-bookings}" class="dropdown-item">
+                                    <i class="fas fa-calendar-alt"></i> My Bookings
+                                </a>
+                                
+                                <div class="dropdown-divider"></div>
+                                
+                                 Logout Link 
+                                <a th:href="@{/logout}" class="dropdown-item logout-btn">
+                                    <i class="fas fa-sign-out-alt"></i> Logout
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li th:unless="${isAuthenticated}">
+                        <div class="auth-buttons">
+                            <a th:href="@{/login}" class="btn btn-login">Log In</a>
+                            <a th:href="@{/register}" class="btn btn-register">Register</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </header>
+
+     Page Header 
+    <section class="page-header">
+        <div class="container">
+            <h1>Book Your Room</h1>
+            <p>Complete your booking by filling out the form below</p>
+        </div>
+    </section>
+
+     Booking Form 
+    <section class="container">
+         Alert for unavailable room 
+        <div th:if="${room != null and !room.available}" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>This room is currently unavailable. Please choose another room.</span>
+        </div>
+        
+         Alert for not logged in 
+        <div th:if="${!isAuthenticated}" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>You need to be logged in to book a room. <a href="/login" style="color: #721c24; text-decoration: underline;">Login here</a></span>
+        </div>
+        
+         Alert for staff/admin trying to book 
+        <div th:if="${isAuthenticated and !canBook}" class="alert alert-info">
+            <i class="fas fa-info-circle"></i>
+            <span>Staff/Admin users cannot book rooms from this page. Please use your dashboard.</span>
+        </div>
+        
+        <div class="booking-container" th:if="${room != null and room.available and isAuthenticated and canBook}">
+             Room Details 
+            <div class="room-details">
+                <h2>Room Details</h2>
+                
+                <div class="room-image" 
+                     th:style="'background-image: url(' + ${room.imageUrl} + ')'"></div>
+                
+                <div class="room-info-grid">
+                    <div class="info-item">
+                        <i class="fas fa-door-closed"></i>
+                        <div>
+                            <div class="info-label">Room Number</div>
+                            <div class="info-value" th:text="${room.roomNumber}">101</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-bed"></i>
+                        <div>
+                            <div class="info-label">Room Type</div>
+                            <div class="info-value" th:text="${room.roomType}">Deluxe Room</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-user-friends"></i>
+                        <div>
+                            <div class="info-label">Capacity</div>
+                            <div class="info-value" th:text="${room.capacity} + ' guests'">2 guests</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                        <div>
+                            <div class="info-label">Room Size</div>
+                            <div class="info-value" th:text="${room.size} + ' sqm'">45 sqm</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-snowflake"></i>
+                        <div>
+                            <div class="info-label">Air Conditioning</div>
+                            <div class="info-value" th:text="${room.hasAc} ? 'Yes' : 'No'">Yes</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <i class="fas fa-glass-whiskey"></i>
+                        <div>
+                            <div class="info-label">Mini Bar</div>
+                            <div class="info-value" th:text="${room.hasMiniBar} ? 'Yes' : 'No'">Yes</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="room-description">
+                    <h3>Description</h3>
+                    <p th:text="${room.description} ?: 'No description available.'">
+                        Luxury deluxe room with king bed and city view.
+                    </p>
+                </div>
+            </div>
+            
+             Booking Form 
+            <div class="booking-form">
+                <h2>Booking Information</h2>
+                
+                <form th:action="@{/bookings/create}" method="post" id="bookingForm">
+                     Hidden room ID 
+                    <input type="hidden" name="roomId" th:value="${room.id}">
+                    
+                    <div class="form-group">
+                        <label for="checkInDate"><i class="fas fa-calendar-check"></i> Check-in Date</label>
+                        <input type="date" id="checkInDate" name="checkInDate" class="form-control" 
+                               th:value="${defaultCheckIn}" required
+                               onchange="calculateTotal()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="checkOutDate"><i class="fas fa-calendar-times"></i> Check-out Date</label>
+                        <input type="date" id="checkOutDate" name="checkOutDate" class="form-control" 
+                               th:value="${defaultCheckOut}" required
+                               onchange="calculateTotal()">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="numberOfGuests"><i class="fas fa-users"></i> Number of Guests</label>
+                            <input type="number" id="numberOfGuests" name="numberOfGuests" class="form-control" 
+                                   min="1" th:attr="max=${room.capacity}" th:value="${room.capacity > 1 ? 2 : 1}" required
+                                   onchange="validateGuests()">
+                            <small style="color: #666; font-size: 12px; display: block; margin-top: 5px;">
+                                Maximum: <span th:text="${room.capacity}"></span> guests
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="totalNights"><i class="fas fa-moon"></i> Total Nights</label>
+                            <input type="text" id="totalNights" class="form-control" readonly value="1">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="username"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="username" class="form-control" th:value="${username}" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="specialRequests"><i class="fas fa-comment-alt"></i> Special Requests (Optional)</label>
+                        <textarea id="specialRequests" name="specialRequests" class="form-control" 
+                                  rows="4" placeholder="Any special requests or notes for your stay..."></textarea>
+                    </div>
+                    
+                     Booking Summary 
+                    <div class="booking-summary">
+                        <h3>Booking Summary</h3>
+                        
+                        <div class="summary-item">
+                            <span class="summary-label">Room Type:</span>
+                            <span class="summary-value" th:text="${room.roomType}">Deluxe Room</span>
+                        </div>
+                        
+                        <div class="summary-item">
+                            <span class="summary-label">Price per night:</span>
+                            <span class="summary-value" th:text="'$' + ${room.pricePerNight}">$299.99</span>
+                        </div>
+                        
+                        <div class="summary-item">
+                            <span class="summary-label">Number of nights:</span>
+                            <span class="summary-value" id="nightsDisplay">1</span>
+                        </div>
+                        
+                        <div class="total-price">
+                            <span>Total Price:</span>
+                            <span id="totalPrice" th:text="'$' + ${room.pricePerNight}">$299.99</span>
+                        </div>
+                    </div>
+                    
+                     Terms and Conditions 
+                    <div style="margin-bottom: 20px; font-size: 14px; color: #666;">
+                        <input type="checkbox" id="terms" name="terms" required style="margin-right: 8px;">
+                        <label for="terms">I agree to the <a href="#" style="color: #b8860b;">Terms and Conditions</a> and <a href="#" style="color: #b8860b;">Cancellation Policy</a></label>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit" id="submitBtn">
+                        <i class="fas fa-calendar-check"></i> Confirm Booking
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+         Back button if room is unavailable or user cannot book 
+        <div th:if="${room == null or !room.available or !isAuthenticated or !canBook}" style="text-align: center; margin: 40px 0;">
+            <a href="/rooms" class="btn-submit" style="width: auto; padding: 12px 30px; display: inline-flex;">
+                <i class="fas fa-arrow-left"></i> Back to Rooms
+            </a>
+        </div>
+    </section>
+
+     Footer 
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Grand Hotel</h3>
+                    <p>Experience luxury at its finest. Grand Hotel offers premium accommodations with world-class amenities and exceptional service.</p>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="/home">Home</a></li>
+                        <li><a href="/rooms">Rooms & Suites</a></li>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#contact">Contact Us</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links contact-info">
+                        <li><i class="fas fa-map-marker-alt"></i> Tilottama-1, Shankar Nagar</li>
+                        <li><i class="fas fa-phone"></i> +977 12334567</li>
+                        <li><i class="fas fa-envelope"></i> reservations@grandhotel.com</li>
+                        <li><i class="fas fa-clock"></i> Front Desk: 24/7</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2023 Grand Hotel. All rights reserved. | Luxury Redefined Since 1925
+            </div>
+        </div>
+    </footer>
+
+	<script>
+	    // Mobile menu toggle
+	    const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+	    const navLinks = document.getElementById('navLinks');
+	    
+	    if (mobileMenuBtn) {
+	        mobileMenuBtn.addEventListener('click', () => {
+	            navLinks.classList.toggle('active');
+	            mobileMenuBtn.innerHTML = navLinks.classList.contains('active') 
+	                ? '<i class="fas fa-times"></i>' 
+	                : '<i class="fas fa-bars"></i>';
+	        });
+	    }
+	    
+	    // Close mobile menu when clicking outside
+	    document.addEventListener('click', (e) => {
+	        if (navLinks && !navLinks.contains(e.target) && mobileMenuBtn && !mobileMenuBtn.contains(e.target)) {
+	            navLinks.classList.remove('active');
+	            if (mobileMenuBtn) mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+	        }
+	    });
+	    
+	    // User dropdown functionality
+	    const userMenuBtn = document.getElementById('userMenuBtn');
+	    const dropdownMenu = document.getElementById('dropdownMenu');
+	    
+	    if (userMenuBtn && dropdownMenu) {
+	        userMenuBtn.addEventListener('click', function(e) {
+	            e.stopPropagation();
+	            dropdownMenu.classList.toggle('show');
+	        });
+	        
+	        // Close dropdown when clicking outside
+	        document.addEventListener('click', function(e) {
+	            if (!userMenuBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+	                dropdownMenu.classList.remove('show');
+	            }
+	        });
+	    }
+	    
+	    // Set default dates for check-in and check-out
+	    const today = new Date();
+	    const tomorrow = new Date(today);
+	    tomorrow.setDate(tomorrow.getDate() + 1);
+	    
+	    // Format dates as YYYY-MM-DD
+	    const formatDate = (date) => {
+	        const year = date.getFullYear();
+	        const month = String(date.getMonth() + 1).padStart(2, '0');
+	        const day = String(date.getDate()).padStart(2, '0');
+	        return `${year}-${month}-${day}`;
+	    };
+	    
+	    // Initialize date inputs
+	    function initializeDateInputs() {
+	        const checkInDateInput = document.getElementById('checkInDate');
+	        const checkOutDateInput = document.getElementById('checkOutDate');
+	        
+	        if (checkInDateInput) {
+	            // If no default value from server, set to today
+	            if (!checkInDateInput.value) {
+	                checkInDateInput.value = formatDate(today);
+	            }
+	            checkInDateInput.min = formatDate(today);
+	            
+	            // When check-in date changes, update check-out min date
+	            checkInDateInput.addEventListener('change', function() {
+	                const checkInDate = new Date(this.value);
+	                const nextDay = new Date(checkInDate);
+	                nextDay.setDate(nextDay.getDate() + 1);
+	                
+	                if (checkOutDateInput) {
+	                    checkOutDateInput.min = formatDate(nextDay);
+	                    
+	                    // If current check-out is before new min, adjust it
+	                    const currentCheckOut = new Date(checkOutDateInput.value);
+	                    if (currentCheckOut <= checkInDate) {
+	                        checkOutDateInput.value = formatDate(nextDay);
+	                    }
+	                }
+	                
+	                calculateTotal();
+	            });
+	        }
+	        
+	        if (checkOutDateInput) {
+	            // If no default value from server, set to tomorrow
+	            if (!checkOutDateInput.value) {
+	                checkOutDateInput.value = formatDate(tomorrow);
+	            }
+	            
+	            if (checkInDateInput) {
+	                const checkInDate = new Date(checkInDateInput.value);
+	                const nextDay = new Date(checkInDate);
+	                nextDay.setDate(nextDay.getDate() + 1);
+	                checkOutDateInput.min = formatDate(nextDay);
+	            }
+	            
+	            checkOutDateInput.addEventListener('change', calculateTotal);
+	        }
+	    }
+	    
+	    // Calculate total nights and price
+	    function calculateTotal() {
+	        const checkInDate = document.getElementById('checkInDate');
+	        const checkOutDate = document.getElementById('checkOutDate');
+	        const totalNightsInput = document.getElementById('totalNights');
+	        const nightsDisplay = document.getElementById('nightsDisplay');
+	        const totalPriceDisplay = document.getElementById('totalPrice');
+	        
+	        if (!checkInDate || !checkOutDate || !checkInDate.value || !checkOutDate.value) {
+	            return;
+	        }
+	        
+	        const checkIn = new Date(checkInDate.value);
+	        const checkOut = new Date(checkOutDate.value);
+	        
+	        // Validate dates
+	        if (checkOut <= checkIn) {
+	            alert('Check-out date must be after check-in date');
+	            if (checkOutDate) {
+	                const nextDay = new Date(checkIn);
+	                nextDay.setDate(nextDay.getDate() + 1);
+	                checkOutDate.value = formatDate(nextDay);
+	            }
+	            return;
+	        }
+	        
+	        // Calculate nights
+	        const timeDiff = checkOut.getTime() - checkIn.getTime();
+	        const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+	        
+	        // Update display
+	        if (totalNightsInput) totalNightsInput.value = nights;
+	        if (nightsDisplay) nightsDisplay.textContent = nights;
+	        
+	        // Calculate total price
+	        // Get price from Thymeleaf rendered content
+	        let pricePerNight = 299.99; // Default fallback
+	        
+	        // Try to get price from room details
+	        const priceElements = document.querySelectorAll('.summary-value');
+	        for (let element of priceElements) {
+	            const text = element.textContent;
+	            if (text && text.includes('$')) {
+	                const match = text.match(/\$(\d+\.?\d*)/);
+	                if (match) {
+	                    pricePerNight = parseFloat(match[1]);
+	                    break;
+	                }
+	            }
+	        }
+	        
+	        const totalPrice = nights * pricePerNight;
+	        
+	        if (totalPriceDisplay) {
+	            totalPriceDisplay.textContent = '$' + totalPrice.toFixed(2);
+	        }
+	    }
+	    
+	    // Validate number of guests
+	    function validateGuests() {
+	        const guestsInput = document.getElementById('numberOfGuests');
+	        if (!guestsInput) return;
+	        
+	        const maxGuests = parseInt(guestsInput.getAttribute('max') || '4');
+	        const minGuests = parseInt(guestsInput.getAttribute('min') || '1');
+	        const currentGuests = parseInt(guestsInput.value) || minGuests;
+	        
+	        if (currentGuests > maxGuests) {
+	            alert('Maximum ' + maxGuests + ' guests allowed for this room');
+	            guestsInput.value = maxGuests;
+	        }
+	        
+	        if (currentGuests < minGuests) {
+	            guestsInput.value = minGuests;
+	        }
+	    }
+	    
+	    // Form validation before submission
+	    function setupFormValidation() {
+	        const bookingForm = document.getElementById('bookingForm');
+	        if (!bookingForm) return;
+	        
+	        bookingForm.addEventListener('submit', function(e) {
+	            e.preventDefault();
+	            
+	            // Get form elements
+	            const checkInDate = document.getElementById('checkInDate');
+	            const checkOutDate = document.getElementById('checkOutDate');
+	            const numberOfGuests = document.getElementById('numberOfGuests');
+	            const terms = document.getElementById('terms');
+	            const submitBtn = document.getElementById('submitBtn');
+	            
+	            // Validate required fields
+	            if (!checkInDate || !checkInDate.value) {
+	                alert('Please select a check-in date');
+	                checkInDate.focus();
+	                return;
+	            }
+	            
+	            if (!checkOutDate || !checkOutDate.value) {
+	                alert('Please select a check-out date');
+	                checkOutDate.focus();
+	                return;
+	            }
+	            
+	            if (!numberOfGuests || !numberOfGuests.value) {
+	                alert('Please enter the number of guests');
+	                numberOfGuests.focus();
+	                return;
+	            }
+	            
+	            // Validate dates
+	            const checkIn = new Date(checkInDate.value);
+	            const checkOut = new Date(checkOutDate.value);
+	            
+	            if (checkOut <= checkIn) {
+	                alert('Check-out date must be after check-in date');
+	                checkOutDate.focus();
+	                return;
+	            }
+	            
+	            // Calculate minimum stay (if any)
+	            const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 3600 * 24));
+	            if (nights < 1) {
+	                alert('Minimum stay is 1 night');
+	                return;
+	            }
+	            
+	            // Validate guests number
+	            const maxGuests = parseInt(numberOfGuests.getAttribute('max') || '4');
+	            const guests = parseInt(numberOfGuests.value);
+	            
+	            if (guests > maxGuests) {
+	                alert('Maximum ' + maxGuests + ' guests allowed for this room');
+	                numberOfGuests.focus();
+	                return;
+	            }
+	            
+	            if (guests < 1) {
+	                alert('Number of guests must be at least 1');
+	                numberOfGuests.focus();
+	                return;
+	            }
+	            
+	            // Validate terms and conditions
+	            if (!terms || !terms.checked) {
+	                alert('You must agree to the Terms and Conditions');
+	                if (terms) terms.focus();
+	                return;
+	            }
+	            
+	            // Disable submit button to prevent double submission
+	            if (submitBtn) {
+	                submitBtn.disabled = true;
+	                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+	            }
+	            
+	            // Show processing message
+	            const processingAlert = document.createElement('div');
+	            processingAlert.className = 'alert alert-info';
+	            processingAlert.innerHTML = `
+	                <i class="fas fa-spinner fa-spin"></i>
+	                <span>Processing your booking request. Please wait...</span>
+	            `;
+	            
+	            const existingAlert = bookingForm.querySelector('.alert');
+	            if (existingAlert) {
+	                existingAlert.before(processingAlert);
+	            } else {
+	                bookingForm.prepend(processingAlert);
+	            }
+	            
+	            // Submit the form after a short delay to show processing state
+	            setTimeout(() => {
+	                bookingForm.submit();
+	            }, 1000);
+	        });
+	    }
+	    
+	    // Initialize everything on page load
+	    document.addEventListener('DOMContentLoaded', function() {
+	        // Initialize date inputs
+	        initializeDateInputs();
+	        
+	        // Calculate initial total
+	        calculateTotal();
+	        
+	        // Validate initial guests
+	        validateGuests();
+	        
+	        // Setup form validation
+	        setupFormValidation();
+	        
+	        // Add event listeners for guest input
+	        const guestsInput = document.getElementById('numberOfGuests');
+	        if (guestsInput) {
+	            guestsInput.addEventListener('input', validateGuests);
+	            guestsInput.addEventListener('change', validateGuests);
+	        }
+	        
+	        // Check for URL success parameter
+	        checkForSuccessMessage();
+	        
+	        // Add input validation styling
+	        const formInputs = document.querySelectorAll('.form-control:not([readonly])');
+	        formInputs.forEach(input => {
+	            input.addEventListener('focus', function() {
+	                this.parentElement.style.transform = 'scale(1.02)';
+	                this.parentElement.style.transition = 'transform 0.2s ease';
+	            });
+	            
+	            input.addEventListener('blur', function() {
+	                this.parentElement.style.transform = 'scale(1)';
+	            });
+	            
+	            // Validate on input change
+	            input.addEventListener('input', function() {
+	                if (this.value.trim()) {
+	                    this.style.borderColor = '#b8860b';
+	                } else {
+	                    this.style.borderColor = '#ddd';
+	                }
+	            });
+	        });
+	    });
+	    
+	    // Handle window resize to close mobile menu on larger screens
+	    window.addEventListener('resize', function() {
+	        if (window.innerWidth > 768 && navLinks && navLinks.classList.contains('active')) {
+	            navLinks.classList.remove('active');
+	            if (mobileMenuBtn) mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+	        }
+	    });
+	    
+	    // Smooth scroll for anchor links
+	    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+	        anchor.addEventListener('click', function(e) {
+	            const href = this.getAttribute('href');
+	            
+	            // Skip if it's just "#"
+	            if (href === '#') return;
+	            
+	            // Don't smooth scroll for same-page anchor links when mobile menu is open
+	            if (navLinks && navLinks.classList.contains('active') && href.startsWith('#')) {
+	                navLinks.classList.remove('active');
+	                if (mobileMenuBtn) mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+	            }
+	            
+	            // Smooth scroll logic
+	            const targetId = href.substring(1);
+	            const targetElement = document.getElementById(targetId);
+	            
+	            if (targetElement) {
+	                e.preventDefault();
+	                window.scrollTo({
+	                    top: targetElement.offsetTop - 80,
+	                    behavior: 'smooth'
+	                });
+	            }
+	        });
+	    });
+	    
+	    // Show a confirmation message if booking was successful (from URL parameter)
+	    function checkForSuccessMessage() {
+	        const urlParams = new URLSearchParams(window.location.search);
+	        if (urlParams.has('success')) {
+	            // Create success alert
+	            const successAlert = document.createElement('div');
+	            successAlert.className = 'alert alert-info';
+	            successAlert.style.backgroundColor = '#d4edda';
+	            successAlert.style.borderColor = '#c3e6cb';
+	            successAlert.style.color = '#155724';
+	            successAlert.innerHTML = `
+	                <i class="fas fa-check-circle"></i>
+	                <span><strong>Booking successful!</strong> Your reservation has been confirmed. 
+	                You can view your booking in your dashboard.</span>
+	            `;
+	            
+	            // Insert at the top of the container
+	            const container = document.querySelector('.container');
+	            if (container) {
+	                const firstAlert = container.querySelector('.alert');
+	                if (firstAlert) {
+	                    container.insertBefore(successAlert, firstAlert);
+	                } else {
+	                    const pageHeader = document.querySelector('.page-header');
+	                    if (pageHeader) {
+	                        pageHeader.parentNode.insertBefore(successAlert, pageHeader.nextSibling);
+	                    }
+	                }
+	                
+	                // Auto-remove after 8 seconds
+	                setTimeout(() => {
+	                    successAlert.style.opacity = '0';
+	                    successAlert.style.transition = 'opacity 0.5s';
+	                    setTimeout(() => {
+	                        if (successAlert.parentNode) {
+	                            successAlert.parentNode.removeChild(successAlert);
+	                        }
+	                    }, 500);
+	                }, 8000);
+	            }
+	        }
+	        
+	        // Check for error parameter
+	        if (urlParams.has('error')) {
+	            const errorType = urlParams.get('error');
+	            let errorMessage = 'An error occurred during booking. Please try again.';
+	            
+	            switch(errorType) {
+	                case 'dates':
+	                    errorMessage = 'Selected dates are not available. Please choose different dates.';
+	                    break;
+	                case 'room':
+	                    errorMessage = 'Room is no longer available. Please select another room.';
+	                    break;
+	                case 'capacity':
+	                    errorMessage = 'Number of guests exceeds room capacity.';
+	                    break;
+	            }
+	            
+	            const errorAlert = document.createElement('div');
+	            errorAlert.className = 'alert alert-danger';
+	            errorAlert.innerHTML = `
+	                <i class="fas fa-exclamation-triangle"></i>
+	                <span><strong>Booking Error:</strong> ${errorMessage}</span>
+	            `;
+	            
+	            const container = document.querySelector('.container');
+	            if (container) {
+	                const firstAlert = container.querySelector('.alert');
+	                if (firstAlert) {
+	                    container.insertBefore(errorAlert, firstAlert);
+	                } else {
+	                    const pageHeader = document.querySelector('.page-header');
+	                    if (pageHeader) {
+	                        pageHeader.parentNode.insertBefore(errorAlert, pageHeader.nextSibling);
+	                    }
+	                }
+	            }
+	        }
+	    }
+	    
+	    // Add keyboard shortcuts
+	    document.addEventListener('keydown', function(e) {
+	        // Ctrl/Cmd + Enter to submit form
+	        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+	            const submitBtn = document.getElementById('submitBtn');
+	            if (submitBtn && !submitBtn.disabled) {
+	                submitBtn.click();
+	            }
+	        }
+	        
+	        // Escape to close dropdowns and mobile menu
+	        if (e.key === 'Escape') {
+	            if (dropdownMenu && dropdownMenu.classList.contains('show')) {
+	                dropdownMenu.classList.remove('show');
+	            }
+	            if (navLinks && navLinks.classList.contains('active')) {
+	                navLinks.classList.remove('active');
+	                if (mobileMenuBtn) mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+	            }
+	        }
+	    });
+	    
+	    // Add a print booking summary function
+	    function printBookingSummary() {
+	        const roomType = document.querySelector('.room-details h2')?.textContent || 'Room Details';
+	        const roomNumber = document.querySelector('.info-value')?.textContent || '';
+	        const checkIn = document.getElementById('checkInDate')?.value || '';
+	        const checkOut = document.getElementById('checkOutDate')?.value || '';
+	        const guests = document.getElementById('numberOfGuests')?.value || '2';
+	        const totalPrice = document.getElementById('totalPrice')?.textContent || '$299.99';
+	        const nights = document.getElementById('totalNights')?.value || '1';
+	        
+	        const printContent = `
+	            <html>
+	            <head>
+	                <title>Booking Summary - Grand Hotel</title>
+	                <style>
+	                    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; }
+	                    h1 { color: #b8860b; border-bottom: 2px solid #b8860b; padding-bottom: 10px; }
+	                    .summary { margin: 20px 0; border: 1px solid #ddd; padding: 20px; border-radius: 8px; }
+	                    .summary-item { margin: 10px 0; padding: 10px 0; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+	                    .summary-item:last-child { border-bottom: none; }
+	                    .total { font-size: 1.2em; font-weight: bold; color: #b8860b; margin-top: 20px; padding-top: 20px; border-top: 2px solid #b8860b; }
+	                    .hotel-info { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 0.9em; color: #666; }
+	                    @media print {
+	                        body { padding: 0; }
+	                        .no-print { display: none; }
+	                    }
+	                </style>
+	            </head>
+	            <body>
+	                <h1>Booking Summary - Grand Hotel</h1>
+	                <div class="summary">
+	                    <div class="summary-item"><span>Room Type:</span><span>${roomType}</span></div>
+	                    ${roomNumber ? `<div class="summary-item"><span>Room Number:</span><span>${roomNumber}</span></div>` : ''}
+	                    <div class="summary-item"><span>Check-in Date:</span><span>${checkIn}</span></div>
+	                    <div class="summary-item"><span>Check-out Date:</span><span>${checkOut}</span></div>
+	                    <div class="summary-item"><span>Number of Guests:</span><span>${guests}</span></div>
+	                    <div class="summary-item"><span>Number of Nights:</span><span>${nights}</span></div>
+	                    <div class="total"><span>Total Price:</span><span>${totalPrice}</span></div>
+	                </div>
+	                <div class="hotel-info">
+	                    <p><strong>Grand Hotel</strong></p>
+	                    <p>Tilottama-1, Shankar Nagar</p>
+	                    <p>Phone: +977 12334567</p>
+	                    <p>Email: reservations@grandhotel.com</p>
+	                    <p>Front Desk: 24/7</p>
+	                </div>
+	                <p class="no-print" style="text-align: center; margin-top: 30px;">
+	                    <button onclick="window.print()" style="padding: 10px 20px; background: #b8860b; color: white; border: none; border-radius: 4px; cursor: pointer;">Print Summary</button>
+	                    <button onclick="window.close()" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Close</button>
+	                </p>
+	            </body>
+	            </html>
+	        `;
+	        
+	        const printWindow = window.open('', '_blank', 'width=800,height=600');
+	        printWindow.document.write(printContent);
+	        printWindow.document.close();
+	    }
+	    
+	    // Optional: Add a print button to the form
+	    function addPrintButton() {
+	        const form = document.getElementById('bookingForm');
+	        if (!form) return;
+	        
+	        const printBtn = document.createElement('button');
+	        printBtn.type = 'button';
+	        printBtn.className = 'btn-submit';
+	        printBtn.style.backgroundColor = '#6c757d';
+	        printBtn.style.marginTop = '10px';
+	        printBtn.innerHTML = '<i class="fas fa-print"></i> Print Summary';
+	        printBtn.addEventListener('click', printBookingSummary);
+	        
+	        form.appendChild(printBtn);
+	    }
+	    
+	    // Uncomment to add print button
+	    // addPrintButton();
+	</script>
+</body>
+</html>-->
